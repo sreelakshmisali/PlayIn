@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "playhub-frontend-dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "frontend", "run", "dev", "--", "--host", "--port", "5180", "--strictPort"],
+      "port": 5180,
+      "autoPort": false
+    }
+  ]
+}

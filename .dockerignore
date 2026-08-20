@@ -1,0 +1,15 @@
+# Build context ignore list for the frontend image, which builds from the root.
+.git
+.gitignore
+.env
+.env.*
+!.env.example
+docs/
+README.md
+
+backend/
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.*
+!frontend/.env.example

@@ -1,0 +1,24 @@
+@import 'tailwindcss';
+
+/* Design tokens. Colours are defined once here and referenced through Tailwind
+   utilities everywhere else, so a rebrand is a change to this block. */
+@theme {
+  --color-pitch-50: oklch(0.97 0.02 155);
+  --color-pitch-100: oklch(0.93 0.05 155);
+  --color-pitch-500: oklch(0.62 0.14 155);
+  --color-pitch-600: oklch(0.54 0.13 155);
+  --color-pitch-700: oklch(0.45 0.11 155);
+  --color-pitch-900: oklch(0.28 0.06 155);
+
+  --color-slate-ink: oklch(0.24 0.01 250);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-neutral-50 text-slate-ink antialiased;
+  }
+}

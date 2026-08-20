@@ -1,0 +1,118 @@
+name: playhub
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: playhub-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+      # Deterministic collation, so index ordering does not depend on the host.
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
+    ports:
+      # Exposed on the host so migrations and psql can run outside Docker.
+      - "${DB_PORT_HOST:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - playhub
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      args:
+        VERSION: ${APP_VERSION:-dev}
+    container_name: playhub-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    environment:
+      APP_ENV: ${APP_ENV:-development}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      HTTP_HOST: 0.0.0.0
+      HTTP_PORT: 8080
+      HTTP_ALLOWED_ORIGINS: ${HTTP_ALLOWED_ORIGINS:-http://localhost:5173,http://localhost:3000}
+      # Inside the compose network the database is reachable by service name.
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      DB_SSLMODE: ${DB_SSLMODE:-disable}
+      # No default: the API refuses to start without a signing secret rather
+      # than falling back to a built-in one.
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required, see .env.example}
+      JWT_ISSUER: ${JWT_ISSUER:-playhub}
+      JWT_ACCESS_TTL: ${JWT_ACCESS_TTL:-15m}
+      JWT_REFRESH_TTL: ${JWT_REFRESH_TTL:-720h}
+      BCRYPT_COST: ${BCRYPT_COST:-12}
+    ports:
+      - "${API_PORT_HOST:-8080}:8080"
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://127.0.0.1:8080/api/v1/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    networks:
+      - playhub
+
+  web:
+    build:
+      # Root context: the image needs frontend sources and the nginx config.
+      context: .
+      dockerfile: frontend/Dockerfile
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-}
+    container_name: playhub-web
+    restart: unless-stopped
+    depends_on:
+      - api
+    ports:
+      - "${WEB_PORT_HOST:-3000}:80"
+    networks:
+      - playhub
+
+  # Migration runner. It applies pending migrations and exits; the api service
+  # waits for that exit before starting, so the schema is never behind the code.
+  # Other subcommands run through it too:
+  #   docker compose run --rm migrate down 1
+  #   docker compose run --rm migrate version
+  migrate:
+    image: migrate/migrate:v4.18.1
+    container_name: playhub-migrate
+    restart: "no"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      # Writable so `migrate create` can add new files to the host directory.
+      - ./backend/migrations:/migrations
+    entrypoint:
+      - migrate
+      - -path=/migrations
+      - -database=postgres://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}?sslmode=${DB_SSLMODE:-disable}
+    command: ["up"]
+    networks:
+      - playhub
+
+volumes:
+  postgres_data:
+    name: playhub_postgres_data
+
+networks:
+  playhub:
+    name: playhub
+    driver: bridge

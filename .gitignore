@@ -1,0 +1,26 @@
+# --- secrets -----------------------------------------------------------------
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# --- go ----------------------------------------------------------------------
+backend/bin/
+backend/tmp/
+coverage.out
+coverage.html
+
+# --- node --------------------------------------------------------------------
+node_modules/
+frontend/dist/
+frontend/node_modules/.tmp/
+*.log
+npm-debug.log*
+
+# --- editors and os ----------------------------------------------------------
+.idea/
+.vscode/*
+!.vscode/extensions.json
+.DS_Store
+Thumbs.db
