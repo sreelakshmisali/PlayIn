@@ -72,6 +72,35 @@ func (h *Handler) Routes(mux *http.ServeMux, prefix string) {
 	mux.Handle("DELETE "+prefix+"/owners/me/turfs/{turfId}/images/{imageId}", ownerOnly(http.HandlerFunc(h.RemoveTurfImage)))
 	mux.HandleFunc(prefix+"/owners/me/turfs/{turfId}/images/{imageId}", httpx.MethodNotAllowed)
 
+	mux.Handle("PATCH "+prefix+"/owners/me/turfs/{turfId}/slot-settings", ownerOnly(http.HandlerFunc(h.UpdateSlotSettings)))
+	mux.HandleFunc(prefix+"/owners/me/turfs/{turfId}/slot-settings", httpx.MethodNotAllowed)
+
+	mux.Handle("GET "+prefix+"/owners/me/turfs/{turfId}/slots", ownerOnly(http.HandlerFunc(h.MySlots)))
+	mux.HandleFunc(prefix+"/owners/me/turfs/{turfId}/slots", httpx.MethodNotAllowed)
+
+	mux.Handle("POST "+prefix+"/owners/me/turfs/{turfId}/slots/generate", ownerOnly(http.HandlerFunc(h.GenerateSlots)))
+	// No bare fallback for /slots/generate: it and /slots/{slotId} are both
+	// six segments deep under the same literal parent, so registering a
+	// method-less pattern for each would conflict at startup, the same
+	// conflict (and the same fix) as players.Handler.Routes' /players/me vs
+	// /players/{userId}. The wildcard's own bare fallback below covers wrong
+	// methods on "generate" too, since it matches with slotId = "generate".
+	mux.Handle("PATCH "+prefix+"/owners/me/turfs/{turfId}/slots/{slotId}", ownerOnly(http.HandlerFunc(h.SetSlotStatus)))
+	mux.Handle("DELETE "+prefix+"/owners/me/turfs/{turfId}/slots/{slotId}", ownerOnly(http.HandlerFunc(h.DeleteSlot)))
+	mux.HandleFunc(prefix+"/owners/me/turfs/{turfId}/slots/{slotId}", httpx.MethodNotAllowed)
+
+	mux.Handle("GET "+prefix+"/owners/me/turfs/{turfId}/blocked-dates", ownerOnly(http.HandlerFunc(h.BlockedDates)))
+	mux.Handle("POST "+prefix+"/owners/me/turfs/{turfId}/blocked-dates", ownerOnly(http.HandlerFunc(h.BlockDate)))
+	mux.HandleFunc(prefix+"/owners/me/turfs/{turfId}/blocked-dates", httpx.MethodNotAllowed)
+	mux.Handle("DELETE "+prefix+"/owners/me/turfs/{turfId}/blocked-dates/{blockedDateId}", ownerOnly(http.HandlerFunc(h.UnblockDate)))
+	mux.HandleFunc(prefix+"/owners/me/turfs/{turfId}/blocked-dates/{blockedDateId}", httpx.MethodNotAllowed)
+
+	mux.Handle("GET "+prefix+"/owners/me/turfs/{turfId}/blocked-time-ranges", ownerOnly(http.HandlerFunc(h.BlockedTimeRanges)))
+	mux.Handle("POST "+prefix+"/owners/me/turfs/{turfId}/blocked-time-ranges", ownerOnly(http.HandlerFunc(h.BlockTimeRange)))
+	mux.HandleFunc(prefix+"/owners/me/turfs/{turfId}/blocked-time-ranges", httpx.MethodNotAllowed)
+	mux.Handle("DELETE "+prefix+"/owners/me/turfs/{turfId}/blocked-time-ranges/{blockedTimeRangeId}", ownerOnly(http.HandlerFunc(h.UnblockTimeRange)))
+	mux.HandleFunc(prefix+"/owners/me/turfs/{turfId}/blocked-time-ranges/{blockedTimeRangeId}", httpx.MethodNotAllowed)
+
 	// Public. Browsing turfs and the amenities they can offer needs no token.
 	mux.HandleFunc("GET "+prefix+"/amenities", h.Amenities)
 	mux.HandleFunc(prefix+"/amenities", httpx.MethodNotAllowed)
@@ -81,6 +110,9 @@ func (h *Handler) Routes(mux *http.ServeMux, prefix string) {
 
 	mux.HandleFunc("GET "+prefix+"/turfs/{turfId}", h.PublicTurf)
 	mux.HandleFunc(prefix+"/turfs/{turfId}", httpx.MethodNotAllowed)
+
+	mux.HandleFunc("GET "+prefix+"/turfs/{turfId}/availability", h.PublicAvailability)
+	mux.HandleFunc(prefix+"/turfs/{turfId}/availability", httpx.MethodNotAllowed)
 }
 
 // Amenities handles GET /api/v1/amenities.
@@ -215,6 +247,24 @@ func (h *Handler) fail(w http.ResponseWriter, r *http.Request, err error) {
 	case errors.Is(err, ErrTooManyImages):
 		httpx.Error(w, r, http.StatusUnprocessableEntity, "too_many_images",
 			"This turf already has the maximum number of images.")
+	case errors.Is(err, ErrSlotNotFound):
+		httpx.Error(w, r, http.StatusNotFound, "slot_not_found", "This slot does not exist.")
+	case errors.Is(err, ErrSlotSettingsNotConfigured):
+		httpx.Error(w, r, http.StatusUnprocessableEntity, "slot_settings_not_configured",
+			"Set a slot duration and price before generating slots.")
+	case errors.Is(err, ErrInvalidDateRange):
+		httpx.Error(w, r, http.StatusUnprocessableEntity, "invalid_date_range",
+			"The date range is invalid.")
+	case errors.Is(err, ErrBlockedDateNotFound):
+		httpx.Error(w, r, http.StatusNotFound, "blocked_date_not_found", "This blocked date does not exist.")
+	case errors.Is(err, ErrDateAlreadyBlocked):
+		httpx.Error(w, r, http.StatusConflict, "date_already_blocked", "This date is already blocked.")
+	case errors.Is(err, ErrBlockedTimeRangeNotFound):
+		httpx.Error(w, r, http.StatusNotFound, "blocked_time_range_not_found",
+			"This blocked time range does not exist.")
+	case errors.Is(err, ErrTimeRangeOverlapsBlock):
+		httpx.Error(w, r, http.StatusConflict, "time_range_overlaps_block",
+			"This time range overlaps a block that already exists on this date.")
 	default:
 		h.logger.ErrorContext(r.Context(), "owner request failed",
 			slog.String("path", r.URL.Path),

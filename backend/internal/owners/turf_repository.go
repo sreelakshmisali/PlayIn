@@ -21,6 +21,7 @@ const turfColumns = `
 	t.name, coalesce(t.description, ''), t.address, t.city,
 	t.latitude, t.longitude, t.capacity,
 	t.opening_time, t.closing_time, t.status, coalesce(t.moderation_reason, ''),
+	t.slot_duration_minutes, t.slot_price,
 	t.created_at, t.updated_at`
 
 const turfFrom = `FROM turfs t JOIN owner_profiles op ON op.id = t.owner_id`
@@ -530,6 +531,7 @@ func scanTurfRow(row pgx.Row) (turfRow, error) {
 		&t.Name, &t.Description, &t.Address, &t.City,
 		&t.Latitude, &t.Longitude, &t.Capacity,
 		&t.OpeningTime, &t.ClosingTime, &t.Status, &t.ModerationReason,
+		&t.SlotDurationMinutes, &t.SlotPrice,
 		&t.CreatedAt, &t.UpdatedAt,
 	)
 	return t, err
