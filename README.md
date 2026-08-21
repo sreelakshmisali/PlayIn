@@ -11,7 +11,8 @@ Turfs, bookings, teams and tournaments are not built yet. See
 
 | Part | Technology |
 |---|---|
-| Frontend | React 19, TypeScript 7, Vite 8, Tailwind CSS 4 |
+| Mobile app | React Native, Expo (managed), TypeScript — **the primary player/owner client** |
+| Web frontend | React 19, TypeScript 7, Vite 8, Tailwind CSS 4 — being superseded by mobile; see [Mobile app](#mobile-app-react-native--expo) |
 | Backend | Go 1.25, standard library HTTP, pgx |
 | Database | PostgreSQL 16 |
 | Migrations | golang-migrate, run from Docker |
@@ -20,10 +21,19 @@ Turfs, bookings, teams and tournaments are not built yet. See
 ## Architecture
 
 ```
-browser --> nginx (web:80) --> Go API (api:8080) --> PostgreSQL (postgres:5432)
-              serves the SPA
+React Native app (Expo)  --\
+                             +--> Go API (api:8080) --> PostgreSQL (postgres:5432)
+browser --> nginx (web:80) -/
+              serves the web SPA (admin; player/owner web being retired)
               proxies /api
 ```
+
+The mobile app and the web frontend are two independent clients of the same
+Go REST API under `/api/v1`; neither talks to PostgreSQL directly, and the
+API and database are unchanged by the mobile app's existence. See
+[Mobile app](#mobile-app-react-native--expo) for how the mobile app reaches
+the API from an emulator or a physical device, where `localhost` does not
+mean what it means in a browser.
 
 nginx serves the built bundle and forwards `/api` to the Go service, so the
 browser talks to a single origin. In development the Vite dev server does the
@@ -57,7 +67,17 @@ PlayHub/
 │   ├── cmd/api/          entry point
 │   ├── internal/         application packages
 │   └── migrations/       SQL migrations
-├── frontend/           React SPA
+├── mobile/             React Native + Expo app — the primary client
+│   ├── app/               root composition (providers, RootNavigator)
+│   ├── components/        shared UI primitives
+│   ├── screens/            auth/, public/, player/, owner/ screens
+│   ├── navigation/        AuthNavigator, PlayerNavigator, OwnerNavigator
+│   ├── services/          typed API client and per-domain functions
+│   ├── hooks/             AuthProvider / useAuth
+│   ├── types/             shared request/response types
+│   ├── storage/           SecureStore-backed token storage
+│   └── theme/             colours, spacing, typography
+├── frontend/           React SPA — see "Mobile app" for its current status
 │   └── src/
 │       ├── components/   layout and shared UI
 │       ├── lib/          API client and config
@@ -233,6 +253,172 @@ Type-check only:
 ```bash
 cd frontend && npm run typecheck
 ```
+
+## Mobile app (React Native + Expo)
+
+`mobile/` is the primary PlayHub client for players and owners. It is an
+Expo-managed React Native app in TypeScript, talking to the same Go API under
+`/api/v1` that the web frontend uses — it does not add, duplicate or change
+any backend endpoint.
+
+### Install and start
+
+```bash
+cd mobile && npm install
+```
+
+```bash
+cd mobile && npm start
+```
+
+This starts the Expo dev server (Metro) and prints a QR code. From there,
+press `a` for Android, `i` for iOS (macOS only), `w` for web, or scan the QR
+code with the Expo Go app on a physical device.
+
+### Run on Android
+
+An emulator, already running:
+
+```bash
+cd mobile && npm run android
+```
+
+A physical Android device: install **Expo Go** from the Play Store, run
+`npm start`, and scan the terminal's QR code — the device must be on the same
+Wi-Fi network as the development machine (see API URL below).
+
+### Configuring the API URL
+
+The API's base URL is never hardcoded. It is read from the `EXPO_PUBLIC_API_URL`
+environment variable at build/start time (`mobile/services/config.ts`), which
+Expo inlines automatically — no extra config library involved. Copy the
+example file and edit it:
+
+```bash
+cd mobile && cp .env.example .env
+```
+
+**`localhost` means something different depending on where the app runs, and
+getting this wrong is the most common reason "it works on my machine" fails
+on a phone:**
+
+| Target | `EXPO_PUBLIC_API_URL` | Why |
+|---|---|---|
+| Android emulator | `http://10.0.2.2:8080` (the built-in default — works with no `.env` at all) | `10.0.2.2` is the emulator's own alias for the host machine's `localhost`; the emulator is a separate virtual device, so its `localhost` means itself |
+| iOS Simulator | `http://localhost:8080` | The Simulator shares the Mac's network stack, so this one case is the exception |
+| Physical device (Expo Go or a dev build) | `http://<your-machine's-LAN-IP>:8080` | The phone is a separate device on the network; `localhost` on it means the phone itself, not your computer |
+
+**To find your development machine's LAN IP:**
+
+- Windows: `ipconfig` — use the `IPv4 Address` under your active adapter (Wi-Fi or Ethernet).
+- macOS/Linux: `ifconfig` or `ip addr` — look for the address on your active network interface (often `en0` or `wlan0`).
+
+The phone and the development machine must be on the same network, and the
+Go API must actually be reachable on that IP and port — the Docker Compose
+`api` service already publishes `8080` to the host, so this is normally just
+a firewall check away from working.
+
+### Verifying and building
+
+```bash
+cd mobile && npm run typecheck
+```
+
+```bash
+cd mobile && npx expo-doctor
+```
+
+`expo-doctor` checks the whole project setup (config, dependencies, native
+module compatibility) without needing a device. To produce and sanity-check
+an actual JS bundle for a platform:
+
+```bash
+cd mobile && npx expo export --platform android
+```
+
+### Architecture
+
+The app follows the same layered discipline as the Go backend: screens never
+call `fetch` directly.
+
+```
+screens/   -- one screen per route, owns its own local state and loading/error/empty UI
+  uses  hooks/useAuth()          -- session: user, status, login, register, logout
+  uses  services/*.ts            -- one typed function per API call (auth, players, owners)
+        services/api.ts          -- the one place that builds requests: headers, JSON,
+                                     the ApiError type, and automatic refresh-and-retry on 401
+        storage/tokens.ts        -- expo-secure-store, never AsyncStorage or any
+                                     unencrypted store, for the access/refresh token pair
+navigation/ -- RootNavigator picks Auth / Player / Owner by session status and role
+```
+
+`services/api.ts` is the mobile equivalent of the web app's `lib/api.ts`: a
+single `api.get/post/put/patch/delete` surface, a typed `ApiError` with
+`.status`, `.code` and `.fieldErrors()`, and a single-flight refresh so N
+requests that all hit a 401 at once only trigger one `/auth/refresh` call.
+The one structural difference from the web client is that mobile token
+storage (`expo-secure-store`) is asynchronous, so every read goes through
+`await readTokens()` rather than a synchronous `localStorage` call.
+
+### Mobile UX notes
+
+- `components/Screen.tsx` is the one place every screen gets safe-area insets,
+  optional scrolling, and (for forms) `KeyboardAvoidingView` so the keyboard
+  never covers the field being typed into.
+- Every list (turfs, an owner's own turfs) is a `FlatList` with pull-to-refresh,
+  not a `ScrollView` of mapped items.
+- Every screen that loads data has an explicit loading, error and empty state;
+  none of them silently render nothing.
+- `components/Button.tsx` enforces a minimum 44pt touch target on every
+  button, regardless of label length.
+
+### Known limitations of this foundation phase
+
+- No turf slot/availability screens yet. Slot and availability endpoints exist
+  only on the not-yet-merged `feature/slot-availability` branch; this mobile
+  branch was started from `main` deliberately (see the git log), so those
+  endpoints are not present in the backend this branch runs against. The
+  typed client and screens for this can be added once that branch merges.
+  It was not in this phase's required screen list.
+  ADMIN accounts see a "not on mobile yet" screen (no admin UI in this phase).
+- No sports picker on the player profile screen (add/remove a preferred
+  sport). The profile screen displays existing preferred sports; editing them
+  is deferred to keep this foundation phase's scope to what proves the
+  architecture.
+- No turf sports/amenities/photo management on the owner turf form — only the
+  core turf fields (name, address, city, hours, capacity). The web app's
+  richer editor for these sub-resources was not ported.
+- Public guest browsing (turfs visible before signing in) is not implemented;
+  the three navigation flows are exactly auth / player / owner, matching the
+  brief. A future phase can add a guest-accessible public stack if wanted.
+- Not tested on a physical device or Android emulator in this environment —
+  none was available. What *was* verified: `tsc --noEmit`, `expo-doctor`
+  (21/21 checks), a real Metro bundle build for Android (`expo export` and a
+  live bundle request against a running dev server), and every API contract
+  the app's `services/` layer depends on (register, login, `/auth/me`,
+  refresh-token rotation, unauthorized handling, player profile, owner
+  profile, turf creation) exercised directly against the real Go API with the
+  exact request/response shapes the TypeScript types declare.
+
+## Web frontend: current status
+
+`frontend/` is **not deleted and not modified** by the mobile migration. It
+remains in the repository, working, for two reasons:
+
+1. **It is still the admin web interface.** Turf moderation and user
+   management (`/admin/...`) are explicitly out of scope for React Native in
+   this phase (see CLAUDE.md) and have no mobile equivalent — `frontend/` is
+   the only place they exist.
+2. Its player- and owner-facing pages are now **superseded, not removed**.
+   They still build and run, but React Native + Expo (`mobile/`) is the
+   approved primary client for those two roles going forward; new
+   player/owner work belongs in `mobile/`, not `frontend/`.
+
+This is a deliberate, temporary state, not an oversight: `frontend/` continues
+to serve admin needs today, while carrying player/owner pages that are no
+longer the primary surface for those roles. A future phase should decide
+between trimming `frontend/` down to an admin-only app or replacing it
+entirely; that decision is out of scope here and is left open on purpose.
 
 ## API
 
