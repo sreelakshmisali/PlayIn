@@ -211,6 +211,19 @@ export function OwnerTurfEditPage() {
         <TurfStatusBadge status={turf.status} />
       </header>
 
+      <Link
+        to={`/owner/turfs/${turf.id}/availability`}
+        className="mt-4 flex items-center justify-between gap-3 rounded-xl border border-neutral-200 bg-white p-4 transition-colors hover:bg-neutral-50"
+      >
+        <div>
+          <p className="font-medium text-neutral-900">Availability</p>
+          <p className="mt-0.5 text-sm text-neutral-500">Slot duration, pricing, generated slots and blocks.</p>
+        </div>
+        <span aria-hidden="true" className="text-neutral-400">
+          →
+        </span>
+      </Link>
+
       {actionMessage && (
         <div className="mt-4">
           <FormAlert message={actionMessage} />

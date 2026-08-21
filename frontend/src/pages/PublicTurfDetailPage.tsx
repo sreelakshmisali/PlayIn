@@ -1,7 +1,11 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 
+import { AvailableSlotsList } from '@/components/availability/AvailableSlotsList'
+import { DayStrip } from '@/components/availability/DayStrip'
 import { ApiError } from '@/lib/api'
+import { fetchPublicAvailability, type Slot } from '@/lib/availability'
+import { today } from '@/lib/date'
 import { fetchPublicTurf, type Turf } from '@/lib/owners'
 
 type State =
@@ -18,6 +22,11 @@ type State =
 export function PublicTurfDetailPage() {
   const { turfId = '' } = useParams()
   const [state, setState] = useState<State>({ kind: 'loading' })
+
+  const [selectedDate, setSelectedDate] = useState(today())
+  const [slots, setSlots] = useState<Slot[]>([])
+  const [slotsState, setSlotsState] = useState<'loading' | 'ready' | 'failed'>('loading')
+  const [slotsErrorMessage, setSlotsErrorMessage] = useState('')
 
   useEffect(() => {
     const controller = new AbortController()
@@ -40,6 +49,29 @@ export function PublicTurfDetailPage() {
 
     return () => controller.abort()
   }, [turfId])
+
+  useEffect(() => {
+    if (state.kind !== 'ready') return
+
+    let cancelled = false
+    setSlotsState('loading')
+
+    fetchPublicAvailability(turfId, selectedDate)
+      .then((fetched) => {
+        if (cancelled) return
+        setSlots(fetched)
+        setSlotsState('ready')
+      })
+      .catch((error: unknown) => {
+        if (cancelled) return
+        setSlotsErrorMessage(error instanceof ApiError ? error.message : 'Could not load slots for this date.')
+        setSlotsState('failed')
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [state.kind, turfId, selectedDate])
 
   if (state.kind === 'loading') {
     return <p className="text-neutral-500">Loading turf.</p>
@@ -108,6 +140,14 @@ export function PublicTurfDetailPage() {
           <Row label="Coordinates" value={`${turf.latitude}, ${turf.longitude}`} />
         )}
       </dl>
+
+      <section className="mt-6">
+        <h2 className="text-sm font-medium text-neutral-800">Availability</h2>
+        <div className="mt-2">
+          <DayStrip value={selectedDate} onChange={setSelectedDate} />
+          <AvailableSlotsList state={slotsState} slots={slots} errorMessage={slotsErrorMessage} />
+        </div>
+      </section>
 
       {turf.sports.length > 0 && (
         <section className="mt-6">

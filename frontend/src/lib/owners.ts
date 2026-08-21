@@ -66,6 +66,9 @@ export interface Turf {
   status: TurfStatus
   /** Set only for REJECTED and SUSPENDED: why an admin moved it there. */
   moderation_reason?: string
+  /** Unset until the owner configures both through PATCH .../slot-settings. */
+  slot_duration_minutes?: number
+  slot_price?: number
   sports: SportRef[]
   amenities: Amenity[]
   images: TurfImage[]

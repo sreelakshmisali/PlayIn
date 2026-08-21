@@ -1,6 +1,9 @@
 package owners
 
-import "context"
+import (
+	"context"
+	"time"
+)
 
 // Store is the persistence the service needs. It is declared here, as an
 // interface, so the service can be tested without PostgreSQL and so the
@@ -34,6 +37,21 @@ type Store interface {
 	RejectTurf(ctx context.Context, turfID, adminUserID, reason string) (Turf, error)
 	SuspendTurf(ctx context.Context, turfID, adminUserID, reason string) (Turf, error)
 	RestoreTurf(ctx context.Context, turfID, adminUserID string) (Turf, error)
+
+	UpdateSlotSettings(ctx context.Context, ownerProfileID, turfID string, f slotSettingsFields) (Turf, error)
+	SlotsInRange(ctx context.Context, ownerProfileID, turfID string, from, to time.Time) ([]Slot, error)
+	PublicSlotsForDate(ctx context.Context, turfID string, date time.Time) ([]Slot, error)
+	InsertSlots(ctx context.Context, ownerProfileID, turfID string, candidates []slotCandidate) error
+	SetSlotStatus(ctx context.Context, ownerProfileID, turfID, slotID string, status SlotStatus) (Slot, error)
+	DeleteSlot(ctx context.Context, ownerProfileID, turfID, slotID string) error
+
+	BlockedDates(ctx context.Context, ownerProfileID, turfID string) ([]BlockedDate, error)
+	BlockDate(ctx context.Context, ownerProfileID, turfID string, date time.Time, reason string) (BlockedDate, error)
+	UnblockDate(ctx context.Context, ownerProfileID, turfID, blockedDateID string) error
+
+	BlockedTimeRanges(ctx context.Context, ownerProfileID, turfID string) ([]BlockedTimeRange, error)
+	BlockTimeRange(ctx context.Context, ownerProfileID, turfID string, date time.Time, startTime, endTime, reason string) (BlockedTimeRange, error)
+	UnblockTimeRange(ctx context.Context, ownerProfileID, turfID, blockedTimeRangeID string) error
 }
 
 // Service holds the owner profile and turf rules.

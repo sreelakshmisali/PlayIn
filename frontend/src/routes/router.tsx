@@ -13,6 +13,7 @@ import { LoginPage } from '@/pages/LoginPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
 import { OwnerProfileEditPage } from '@/pages/OwnerProfileEditPage'
 import { OwnerProfilePage } from '@/pages/OwnerProfilePage'
+import { OwnerTurfAvailabilityPage } from '@/pages/OwnerTurfAvailabilityPage'
 import { OwnerTurfCreatePage } from '@/pages/OwnerTurfCreatePage'
 import { OwnerTurfEditPage } from '@/pages/OwnerTurfEditPage'
 import { OwnerTurfListPage } from '@/pages/OwnerTurfListPage'
@@ -74,6 +75,7 @@ export const router = createBrowserRouter([
           { path: 'owner/turfs', element: <OwnerTurfListPage /> },
           { path: 'owner/turfs/new', element: <OwnerTurfCreatePage /> },
           { path: 'owner/turfs/:turfId/edit', element: <OwnerTurfEditPage /> },
+          { path: 'owner/turfs/:turfId/availability', element: <OwnerTurfAvailabilityPage /> },
         ],
       },
 

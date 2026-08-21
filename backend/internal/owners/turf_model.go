@@ -72,33 +72,40 @@ type Turf struct {
 	// every other status, and reaches the owner through the same read paths
 	// they already use (their turf list and turf detail) rather than a
 	// separate endpoint.
-	ModerationReason string      `json:"moderation_reason,omitempty"`
-	Sports           []SportRef  `json:"sports"`
-	Amenities        []Amenity   `json:"amenities"`
-	Images           []TurfImage `json:"images"`
-	CreatedAt        time.Time   `json:"created_at"`
-	UpdatedAt        time.Time   `json:"updated_at"`
+	ModerationReason string `json:"moderation_reason,omitempty"`
+	// SlotDurationMinutes and SlotPrice are unset until the owner configures
+	// them through PATCH .../slot-settings. Both must be set before slots can
+	// be generated.
+	SlotDurationMinutes *int32      `json:"slot_duration_minutes,omitempty"`
+	SlotPrice           *float64    `json:"slot_price,omitempty"`
+	Sports              []SportRef  `json:"sports"`
+	Amenities           []Amenity   `json:"amenities"`
+	Images              []TurfImage `json:"images"`
+	CreatedAt           time.Time   `json:"created_at"`
+	UpdatedAt           time.Time   `json:"updated_at"`
 }
 
 // turfRow is the stored turf, including the surrogate owner key. It never
 // leaves the package.
 type turfRow struct {
-	ID               string
-	OwnerID          string
-	OwnerDisplayName string
-	Name             string
-	Description      string
-	Address          string
-	City             string
-	Latitude         *float64
-	Longitude        *float64
-	Capacity         *int32
-	OpeningTime      string
-	ClosingTime      string
-	Status           Status
-	ModerationReason string
-	CreatedAt        time.Time
-	UpdatedAt        time.Time
+	ID                  string
+	OwnerID             string
+	OwnerDisplayName    string
+	Name                string
+	Description         string
+	Address             string
+	City                string
+	Latitude            *float64
+	Longitude           *float64
+	Capacity            *int32
+	OpeningTime         string
+	ClosingTime         string
+	Status              Status
+	ModerationReason    string
+	SlotDurationMinutes *int32
+	SlotPrice           *float64
+	CreatedAt           time.Time
+	UpdatedAt           time.Time
 }
 
 func (t turfRow) toTurf(sports []SportRef, amenities []Amenity, images []TurfImage) Turf {
@@ -113,24 +120,26 @@ func (t turfRow) toTurf(sports []SportRef, amenities []Amenity, images []TurfIma
 	}
 
 	return Turf{
-		ID:               t.ID,
-		OwnerDisplayName: t.OwnerDisplayName,
-		Name:             t.Name,
-		Description:      t.Description,
-		Address:          t.Address,
-		City:             t.City,
-		Latitude:         t.Latitude,
-		Longitude:        t.Longitude,
-		Capacity:         t.Capacity,
-		OpeningTime:      t.OpeningTime,
-		ClosingTime:      t.ClosingTime,
-		Status:           t.Status,
-		ModerationReason: t.ModerationReason,
-		Sports:           sports,
-		Amenities:        amenities,
-		Images:           images,
-		CreatedAt:        t.CreatedAt,
-		UpdatedAt:        t.UpdatedAt,
+		ID:                  t.ID,
+		OwnerDisplayName:    t.OwnerDisplayName,
+		Name:                t.Name,
+		Description:         t.Description,
+		Address:             t.Address,
+		City:                t.City,
+		Latitude:            t.Latitude,
+		Longitude:           t.Longitude,
+		Capacity:            t.Capacity,
+		OpeningTime:         t.OpeningTime,
+		ClosingTime:         t.ClosingTime,
+		Status:              t.Status,
+		ModerationReason:    t.ModerationReason,
+		SlotDurationMinutes: t.SlotDurationMinutes,
+		SlotPrice:           t.SlotPrice,
+		Sports:              sports,
+		Amenities:           amenities,
+		Images:              images,
+		CreatedAt:           t.CreatedAt,
+		UpdatedAt:           t.UpdatedAt,
 	}
 }
 

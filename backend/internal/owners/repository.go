@@ -18,6 +18,10 @@ const invalidTextRepresentation = "22P02"
 // uniqueViolation is PostgreSQL's SQLSTATE for a unique constraint breach.
 const uniqueViolation = "23505"
 
+// exclusionViolation is PostgreSQL's SQLSTATE for an EXCLUDE constraint
+// breach, the overlap guard turf_slots and turf_blocked_time_ranges use.
+const exclusionViolation = "23P01"
+
 // Repository is the only place in the package that writes SQL.
 type Repository struct {
 	db *database.Pool
@@ -117,4 +121,11 @@ func isInvalidUUID(err error) bool {
 func isUniqueViolation(err error) bool {
 	var pgErr *pgconn.PgError
 	return errors.As(err, &pgErr) && pgErr.Code == uniqueViolation
+}
+
+// isExclusionViolation reports whether err is PostgreSQL refusing a row that
+// overlaps another under an EXCLUDE constraint.
+func isExclusionViolation(err error) bool {
+	var pgErr *pgconn.PgError
+	return errors.As(err, &pgErr) && pgErr.Code == exclusionViolation
 }
