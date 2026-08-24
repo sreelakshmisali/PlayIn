@@ -1,5 +1,6 @@
 export { api, ApiError, onSessionEnded } from './api'
 export * as authApi from './auth'
+export * as bookingsApi from './bookings'
 export * as playersApi from './players'
 export * as ownersApi from './owners'
 export { apiBaseUrl } from './config'

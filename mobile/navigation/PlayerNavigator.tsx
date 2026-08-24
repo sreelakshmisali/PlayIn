@@ -5,6 +5,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import {
   AccountScreen,
   HomeScreen,
+  MyBookingsScreen,
   PlayerProfileEditScreen,
   PlayerProfileScreen,
   TurfDetailScreen,
@@ -19,6 +20,7 @@ const Stack = createNativeStackNavigator<PlayerStackParamList>()
 const TAB_ICONS: Record<keyof PlayerTabParamList, keyof typeof Ionicons.glyphMap> = {
   Home: 'home-outline',
   Turfs: 'location-outline',
+  Bookings: 'calendar-outline',
   Profile: 'person-outline',
   Account: 'settings-outline',
 }
@@ -33,6 +35,7 @@ function PlayerTabs() {
     >
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Turfs" component={TurfListScreen} />
+      <Tab.Screen name="Bookings" component={MyBookingsScreen} options={{ title: 'My Bookings' }} />
       <Tab.Screen name="Profile" component={PlayerProfileScreen} options={{ title: 'Profile' }} />
       <Tab.Screen name="Account" component={AccountScreen} />
     </Tab.Navigator>
