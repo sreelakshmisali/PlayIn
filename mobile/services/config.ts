@@ -10,9 +10,11 @@
  * machine's localhost, so `npm run android` works out of the box without a
  * .env file; every other target needs EXPO_PUBLIC_API_URL set explicitly.
  */
-const DEFAULT_ANDROID_EMULATOR_API_URL = 'http://10.0.2.2:8080'
+// const DEFAULT_ANDROID_EMULATOR_API_URL = 'http://10.0.2.2:8080'
 
-export const apiBaseUrl: string = process.env.EXPO_PUBLIC_API_URL ?? DEFAULT_ANDROID_EMULATOR_API_URL
+// export const apiBaseUrl: string = process.env.EXPO_PUBLIC_API_URL ?? DEFAULT_ANDROID_EMULATOR_API_URL
+
+export const apiBaseUrl: string = 'http://172.17.0.235:8080'
 
 /** Version prefix. A breaking API change gets a new client, not a new branch. */
 export const API_PREFIX = '/api/v1'

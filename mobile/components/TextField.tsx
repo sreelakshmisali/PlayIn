@@ -1,21 +1,26 @@
 import { StyleSheet, Text, TextInput, View, type TextInputProps } from 'react-native'
 
-import { colors, radius, spacing, theme, typography } from '../theme'
+import { colors, inputPresets, spacing, theme, typography } from '../theme'
 
 interface TextFieldProps extends TextInputProps {
   label: string
   error?: string
 }
 
-/** A labelled text input, the mobile counterpart of the web app's Field. */
-export function TextField({ label, error, style, ...input }: TextFieldProps) {
+/** A labelled text input, the mobile counterpart of the web app's Field.
+ * Pass `editable={false}` for a read-only/disabled field — it gets its own
+ * muted visual treatment rather than looking like an active input. */
+export function TextField({ label, error, style, editable, ...input }: TextFieldProps) {
+  const disabled = editable === false
+
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>{label}</Text>
+      <Text style={[styles.label, disabled && styles.labelDisabled]}>{label}</Text>
       <TextInput
         {...input}
+        editable={editable}
         placeholderTextColor={colors.neutral400}
-        style={[styles.input, error ? styles.inputError : null, style]}
+        style={[styles.input, disabled && inputPresets.disabled, error ? inputPresets.error : null, style]}
       />
       {error ? (
         <Text style={styles.error} accessibilityRole="alert">
@@ -29,16 +34,7 @@ export function TextField({ label, error, style, ...input }: TextFieldProps) {
 const styles = StyleSheet.create({
   container: { marginBottom: spacing.lg },
   label: { ...typography.label, color: theme.textPrimary, marginBottom: spacing.xs },
-  input: {
-    borderWidth: 1,
-    borderColor: theme.border,
-    borderRadius: radius.md,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
-    fontSize: 16,
-    color: theme.textPrimary,
-    backgroundColor: theme.surface,
-  },
-  inputError: { borderColor: theme.danger },
+  labelDisabled: { color: theme.textDisabled },
+  input: inputPresets.field,
   error: { ...typography.caption, color: theme.dangerText, marginTop: spacing.xs },
 })

@@ -2,6 +2,14 @@
  * Design tokens, not a component library. Kept close to the web app's own
  * "pitch" palette (Tailwind `pitch`/`neutral` scales) so the two clients read
  * as the same product, without sharing any code between them.
+ *
+ * Palette philosophy (see mobile/theme/index.ts for the full contract):
+ * - White is the primary surface everywhere. `neutral50`/`neutral100` are the
+ *   only "secondary surface" tints — reach for a border before reaching for
+ *   a gray fill, so the app doesn't turn into a stack of gray cards.
+ * - Green (`pitch*`) is the one accent. It marks primary actions, the brand,
+ *   and success — never a decorative color. Nothing else in the app should
+ *   introduce a new hue; extend an existing scale instead.
  */
 export const colors = {
   pitch50: '#f0fdf4',
@@ -30,6 +38,11 @@ export const colors = {
   amber700: '#b45309',
   amber800: '#92400e',
 
+  blue50: '#eff6ff',
+  blue200: '#bfdbfe',
+  blue700: '#1d4ed8',
+  blue800: '#1e40af',
+
   white: '#ffffff',
 } as const
 
@@ -38,10 +51,12 @@ export const theme = {
   surface: colors.white,
   surfaceMuted: colors.neutral100,
   border: colors.neutral200,
+  overlay: 'rgba(23, 23, 23, 0.45)', // neutral900 scrim, for sheets/modal backdrops
 
   textPrimary: colors.neutral900,
   textSecondary: colors.neutral600,
   textMuted: colors.neutral400,
+  textDisabled: colors.neutral300,
   textOnPrimary: colors.white,
 
   primary: colors.pitch600,
@@ -49,11 +64,23 @@ export const theme = {
   primarySurface: colors.pitch50,
   primaryText: colors.pitch700,
 
+  // Semantic status colors. `success` deliberately reuses the brand green
+  // scale rather than introducing a second green — one accent, used for
+  // both meanings, keeps the palette restrained.
+  success: colors.pitch600,
+  successSurface: colors.pitch50,
+  successText: colors.pitch700,
+
+  warning: colors.amber700,
+  warningSurface: colors.amber50,
+  warningText: colors.amber800,
+
   danger: colors.red700,
   dangerSurface: colors.red50,
   dangerBorder: colors.red200,
   dangerText: colors.red800,
 
-  warningSurface: colors.amber50,
-  warningText: colors.amber800,
+  info: colors.blue700,
+  infoSurface: colors.blue50,
+  infoText: colors.blue800,
 } as const

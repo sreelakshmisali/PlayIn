@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View, type ViewStyle } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
-import { colors, spacing } from '../theme'
+import { layout, theme } from '../theme'
 
 interface ScreenProps {
   children: ReactNode
@@ -11,6 +11,11 @@ interface ScreenProps {
   /** On for a screen with text inputs, so the keyboard never covers the
    * field being edited. */
   keyboardSafe?: boolean
+  /** 'default' (white) is the app's background everywhere. 'muted' is the
+   * soft tinted surface, for a screen that wants its content to read as
+   * sitting apart from full white — use sparingly (e.g. a booking review
+   * step). */
+  background?: 'default' | 'muted'
   contentStyle?: ViewStyle
 }
 
@@ -21,7 +26,9 @@ interface ScreenProps {
  * actual phone — notches, home indicators, and a keyboard that would
  * otherwise sit on top of the field being typed into.
  */
-export function Screen({ children, scroll = true, keyboardSafe = false, contentStyle }: ScreenProps) {
+export function Screen({ children, scroll = true, keyboardSafe = false, background = 'default', contentStyle }: ScreenProps) {
+  const backgroundColor = background === 'muted' ? theme.surfaceMuted : theme.background
+
   const body = scroll ? (
     <ScrollView
       contentContainerStyle={[styles.scrollContent, contentStyle]}
@@ -34,7 +41,7 @@ export function Screen({ children, scroll = true, keyboardSafe = false, contentS
   )
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom', 'left', 'right']}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor }]} edges={['top', 'bottom', 'left', 'right']}>
       {keyboardSafe ? (
         <KeyboardAvoidingView
           style={styles.flex}
@@ -51,8 +58,8 @@ export function Screen({ children, scroll = true, keyboardSafe = false, contentS
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: colors.white },
+  safeArea: { flex: 1 },
   flex: { flex: 1 },
-  content: { flex: 1, padding: spacing.lg },
-  scrollContent: { flexGrow: 1, padding: spacing.lg, paddingBottom: spacing.xxl },
+  content: { flex: 1, padding: layout.screenPadding },
+  scrollContent: { flexGrow: 1, padding: layout.screenPadding, paddingBottom: layout.screenPadding * 2 },
 })

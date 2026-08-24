@@ -10,7 +10,7 @@ import {
   TurfDetailScreen,
   TurfListScreen,
 } from '../screens'
-import { colors, theme } from '../theme'
+import { stackScreenOptions, tabScreenOptions } from './chrome'
 import type { PlayerStackParamList, PlayerTabParamList } from './types'
 
 const Tab = createBottomTabNavigator<PlayerTabParamList>()
@@ -27,9 +27,7 @@ function PlayerTabs() {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
-        headerShown: false,
-        tabBarActiveTintColor: theme.primary,
-        tabBarInactiveTintColor: colors.neutral400,
+        ...tabScreenOptions,
         tabBarIcon: ({ color, size }) => <Ionicons name={TAB_ICONS[route.name]} color={color} size={size} />,
       })}
     >
@@ -44,7 +42,7 @@ function PlayerTabs() {
 /** Signed-in PLAYER flow: the tab bar plus the screens pushed above it. */
 export function PlayerNavigator() {
   return (
-    <Stack.Navigator screenOptions={{ contentStyle: { backgroundColor: theme.background } }}>
+    <Stack.Navigator screenOptions={stackScreenOptions}>
       <Stack.Screen name="PlayerTabs" component={PlayerTabs} options={{ headerShown: false }} />
       <Stack.Screen name="TurfDetail" component={TurfDetailScreen} options={{ title: 'Turf' }} />
       <Stack.Screen name="PlayerProfileEdit" component={PlayerProfileEditScreen} options={{ title: 'Edit profile' }} />

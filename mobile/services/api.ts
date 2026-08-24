@@ -86,6 +86,11 @@ function buildUrl(path: string, query: RequestOptions['query']): string {
 async function send(method: Method, path: string, options: RequestOptions): Promise<Response> {
   const { query, body, headers = {}, skipAuth } = options
 
+  const url = buildUrl(path, query)
+
+  console.log('🌐 API REQUEST:', method, url)
+  console.log('📦 BODY:', body)
+
   const controller = new AbortController()
   const timeout = setTimeout(() => controller.abort(), apiTimeoutMs)
 
@@ -98,7 +103,11 @@ async function send(method: Method, path: string, options: RequestOptions): Prom
     }
   }
 
-  const init: RequestInit = { method, signal: controller.signal, headers: requestHeaders }
+  const init: RequestInit = {
+    method,
+    signal: controller.signal,
+    headers: requestHeaders,
+  }
 
   if (body !== undefined) {
     init.body = JSON.stringify(body)
@@ -106,14 +115,19 @@ async function send(method: Method, path: string, options: RequestOptions): Prom
   }
 
   try {
-    return await fetch(buildUrl(path, query), init)
+    const response = await fetch(url, init)
+
+    console.log('📥 API RESPONSE:', method, url, response.status)
+
+    return response
   } catch (cause) {
-    // fetch rejects on network failure and abort. Neither carries an HTTP
-    // status, so both are normalised to status 0.
+    console.log('❌ API NETWORK ERROR:', method, url, cause)
+
     const message =
       cause instanceof Error && cause.name === 'AbortError'
         ? 'The request timed out.'
         : 'Could not reach the PlayHub API. Check the API URL and that your device can reach it.'
+
     throw new ApiError(0, { code: 'network_error', message })
   } finally {
     clearTimeout(timeout)

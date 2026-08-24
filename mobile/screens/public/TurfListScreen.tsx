@@ -1,12 +1,13 @@
+import { Ionicons } from '@expo/vector-icons'
 import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs'
-import { useCallback, useEffect, useState } from 'react'
-import { FlatList, RefreshControl, StyleSheet, Text } from 'react-native'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { FlatList, Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native'
 
-import { EmptyState, ErrorBanner, LoadingView, TurfCard } from '../../components'
+import { EmptyState, ErrorBanner, LoadingView, Text, TurfCard } from '../../components'
 import { fetchPublicTurfs } from '../../services/owners'
 import { ApiError } from '../../services/api'
-import { spacing, theme, typography } from '../../theme'
-import type { Turf } from '../../types/owners'
+import { iconSizes, radius, spacing, theme } from '../../theme'
+import type { SportRef, Turf } from '../../types/owners'
 
 // See HomeScreen for why this is typed loosely: the screen is mounted inside
 // two different tab param lists that share this route name but nothing else.
@@ -14,10 +15,20 @@ type Props = BottomTabScreenProps<Record<string, object | undefined>>
 
 type State = { kind: 'loading' } | { kind: 'ready'; turfs: Turf[] } | { kind: 'failed'; message: string }
 
+type SortKey = 'name' | 'price'
+
+const SORT_LABEL: Record<SortKey, string> = { name: 'Name', price: 'Price' }
+
 /** Every APPROVED turf, browsable without needing an owner profile or a booking. */
 export function TurfListScreen({ navigation }: Props) {
   const [state, setState] = useState<State>({ kind: 'loading' })
   const [refreshing, setRefreshing] = useState(false)
+  // Filter/sort are purely client-side over the one list already fetched
+  // below — fetchPublicTurfs() takes no query parameters, so this changes
+  // how the fetched results are presented, never what's requested from the
+  // API.
+  const [sportFilter, setSportFilter] = useState<string | null>(null)
+  const [sortKey, setSortKey] = useState<SortKey>('name')
 
   const load = useCallback(async (isRefresh = false) => {
     if (isRefresh) setRefreshing(true)
@@ -38,6 +49,22 @@ export function TurfListScreen({ navigation }: Props) {
     void load()
   }, [load])
 
+  const allTurfs = state.kind === 'ready' ? state.turfs : []
+
+  const sportOptions = useMemo<SportRef[]>(
+    () => Array.from(new Map(allTurfs.flatMap((turf) => turf.sports).map((sport) => [sport.id, sport])).values()),
+    [allTurfs],
+  )
+
+  const visibleTurfs = useMemo(() => {
+    const filtered = sportFilter ? allTurfs.filter((turf) => turf.sports.some((sport) => sport.id === sportFilter)) : allTurfs
+
+    return [...filtered].sort((a, b) => {
+      if (sortKey === 'name') return a.name.localeCompare(b.name)
+      return (a.slot_price ?? Number.POSITIVE_INFINITY) - (b.slot_price ?? Number.POSITIVE_INFINITY)
+    })
+  }, [allTurfs, sportFilter, sortKey])
+
   if (state.kind === 'loading') {
     return <LoadingView message="Loading turfs" />
   }
@@ -50,7 +77,9 @@ export function TurfListScreen({ navigation }: Props) {
         contentContainerStyle={styles.list}
         ListHeaderComponent={
           <>
-            <Text style={styles.title}>Turfs</Text>
+            <Text variant="screenTitle" style={styles.title}>
+              Turfs
+            </Text>
             <ErrorBanner message={state.message} />
           </>
         }
@@ -60,13 +89,57 @@ export function TurfListScreen({ navigation }: Props) {
 
   return (
     <FlatList
-      data={state.turfs}
+      data={visibleTurfs}
       keyExtractor={(turf) => turf.id}
       contentContainerStyle={styles.list}
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => void load(true)} />}
-      ListHeaderComponent={<Text style={styles.title}>Turfs</Text>}
-      ItemSeparatorComponent={() => <Text style={styles.separator} />}
-      ListEmptyComponent={<EmptyState message="No turfs are listed yet. Check back soon." />}
+      ListHeaderComponent={
+        <View style={styles.header}>
+          <Text variant="screenTitle" style={styles.title}>
+            Turfs
+          </Text>
+
+          {sportOptions.length > 0 && (
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipRow}>
+              <FilterChip label="All" active={sportFilter === null} onPress={() => setSportFilter(null)} />
+              {sportOptions.map((sport) => (
+                <FilterChip
+                  key={sport.id}
+                  label={sport.name}
+                  active={sportFilter === sport.id}
+                  onPress={() => setSportFilter(sport.id)}
+                />
+              ))}
+            </ScrollView>
+          )}
+
+          {allTurfs.length > 0 && (
+            <View style={styles.sortRow}>
+              <Text variant="caption" color="muted">
+                {visibleTurfs.length} {visibleTurfs.length === 1 ? 'turf' : 'turfs'}
+              </Text>
+              <Pressable
+                onPress={() => setSortKey((key) => (key === 'name' ? 'price' : 'name'))}
+                accessibilityRole="button"
+                style={styles.sortButton}
+              >
+                <Ionicons name="swap-vertical-outline" size={iconSizes.sm} color={theme.textSecondary} />
+                <Text variant="caption" color="secondary">{`Sort: ${SORT_LABEL[sortKey]}`}</Text>
+              </Pressable>
+            </View>
+          )}
+        </View>
+      }
+      ItemSeparatorComponent={() => <View style={styles.separator} />}
+      ListEmptyComponent={
+        <EmptyState
+          message={
+            allTurfs.length === 0
+              ? 'No turfs are listed yet. Check back soon.'
+              : 'No turfs match this sport. Try a different filter.'
+          }
+        />
+      }
       renderItem={({ item }) => (
         <TurfCard turf={item} onPress={() => navigation.navigate('TurfDetail', { turfId: item.id })} />
       )}
@@ -74,8 +147,41 @@ export function TurfListScreen({ navigation }: Props) {
   )
 }
 
+function FilterChip({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityState={{ selected: active }}
+      style={[styles.chip, active && styles.chipActive]}
+    >
+      <Text variant="bodyEmphasized" color={active ? 'onPrimary' : 'secondary'}>
+        {label}
+      </Text>
+    </Pressable>
+  )
+}
+
 const styles = StyleSheet.create({
   list: { padding: spacing.lg, flexGrow: 1 },
-  title: { ...typography.title, color: theme.textPrimary, marginBottom: spacing.lg },
+  header: { marginBottom: spacing.lg },
+  title: { color: theme.textPrimary },
+  chipRow: { gap: spacing.sm, marginTop: spacing.lg },
+  chip: {
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: theme.border,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.sm,
+    backgroundColor: theme.surface,
+  },
+  chipActive: { backgroundColor: theme.primary, borderColor: theme.primary },
+  sortRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: spacing.md,
+  },
+  sortButton: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
   separator: { height: spacing.md },
 })
