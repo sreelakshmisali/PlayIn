@@ -1,10 +1,11 @@
+import { Ionicons } from '@expo/vector-icons'
 import { useEffect, useState } from 'react'
-import { StyleSheet, Text, View } from 'react-native'
+import { Image, ScrollView, StyleSheet, View } from 'react-native'
 
-import { EmptyState, ErrorBanner, LoadingView, Screen } from '../../components'
+import { Button, Divider, EmptyState, ErrorBanner, LoadingView, Screen, Surface, Text } from '../../components'
 import { fetchPublicTurf } from '../../services/owners'
 import { ApiError } from '../../services/api'
-import { spacing, theme, typography } from '../../theme'
+import { cardPresets, iconSizes, radius, spacing, theme } from '../../theme'
 import type { Turf } from '../../types/owners'
 
 // Mounted from both the player and owner stacks under the same route name and
@@ -16,7 +17,33 @@ interface Props {
 
 type State = { kind: 'loading' } | { kind: 'ready'; turf: Turf } | { kind: 'missing' } | { kind: 'failed'; message: string }
 
-/** Public detail view for one turf, reachable only while it is APPROVED. */
+const HERO_HEIGHT = 200
+const THUMBNAIL_SIZE = 56
+
+/** "HH:MM" → minutes since midnight, or null if unparseable. Mirrors
+ * `components/TurfCard.tsx`'s own small helper — kept local rather than
+ * shared, since this screen's scope is deliberately just itself. */
+function parseClock(value: string): number | null {
+  const match = /^(\d{1,2}):(\d{2})/.exec(value.trim())
+  if (!match) return null
+  const hours = Number(match[1])
+  const minutes = Number(match[2])
+  if (hours > 23 || minutes > 59) return null
+  return hours * 60 + minutes
+}
+
+function isOpenNow(openingTime: string, closingTime: string): boolean | null {
+  const open = parseClock(openingTime)
+  const close = parseClock(closingTime)
+  if (open === null || close === null || open === close) return null
+  const minutesNow = new Date().getHours() * 60 + new Date().getMinutes()
+  return open < close ? minutesNow >= open && minutesNow < close : minutesNow >= open || minutesNow < close
+}
+
+/** Public detail view for one turf, reachable only while it is APPROVED.
+ * Organized so the case for booking builds top to bottom: what it looks
+ * like, what it is, what it costs, whether it's open now — then the one
+ * action every other section is building toward. */
 export function TurfDetailScreen({ route }: Props) {
   const { turfId } = route.params
   const [state, setState] = useState<State>({ kind: 'loading' })
@@ -64,87 +91,147 @@ export function TurfDetailScreen({ route }: Props) {
   }
 
   const { turf } = state
+  const heroImage = turf.images[0]
+  const galleryImages = turf.images.slice(1, 5)
+  const openStatus = isOpenNow(turf.opening_time, turf.closing_time)
 
   return (
     <Screen>
-      <Text style={styles.name}>{turf.name}</Text>
-      <Text style={styles.address}>
-        {turf.address}, {turf.city}
-      </Text>
-      <Text style={styles.listedBy}>Listed by {turf.owner_display_name}</Text>
-
-      {turf.description ? <Text style={styles.description}>{turf.description}</Text> : null}
-
-      <View style={styles.factsCard}>
-        <Row label="Hours" value={`${turf.opening_time} – ${turf.closing_time}`} />
-        {turf.capacity !== undefined ? <Row label="Capacity" value={`${turf.capacity} players`} /> : null}
-      </View>
-
-      {turf.sports.length > 0 && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Sports</Text>
-          <View style={styles.pillRow}>
-            {turf.sports.map((sport) => (
-              <View key={sport.id} style={styles.pill}>
-                <Text style={styles.pillText}>{sport.name}</Text>
-              </View>
-            ))}
-          </View>
+      {heroImage ? (
+        <Image source={{ uri: heroImage.image_url }} style={styles.hero} />
+      ) : (
+        <View style={[styles.hero, styles.heroPlaceholder]}>
+          <Ionicons name="football-outline" size={iconSizes.xl} color={theme.primary} />
         </View>
       )}
 
+      {galleryImages.length > 0 && (
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.gallery}>
+          {galleryImages.map((image) => (
+            <Image key={image.id} source={{ uri: image.image_url }} style={styles.thumbnail} />
+          ))}
+        </ScrollView>
+      )}
+
+      <Text variant="screenTitle" style={styles.name}>
+        {turf.name}
+      </Text>
+
+      <View style={styles.locationRow}>
+        <Ionicons name="location-outline" size={iconSizes.sm} color={theme.textMuted} />
+        <Text variant="body" color="secondary" style={styles.locationText}>
+          {turf.address}, {turf.city}
+        </Text>
+      </View>
+      <Text variant="metadata" color="muted" style={styles.listedBy}>
+        Listed by {turf.owner_display_name}
+      </Text>
+
+      {turf.sports.length > 0 && (
+        <View style={styles.pillRow}>
+          {turf.sports.map((sport) => (
+            <View key={sport.id} style={styles.pill}>
+              <Text variant="caption" color="secondary">
+                {sport.name}
+              </Text>
+            </View>
+          ))}
+        </View>
+      )}
+
+      {turf.description ? (
+        <>
+          <Divider />
+          <Text variant="body" color="primary">
+            {turf.description}
+          </Text>
+        </>
+      ) : null}
+
       {turf.amenities.length > 0 && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Amenities</Text>
+        <>
+          <Divider />
+          <Text variant="label" color="primary" style={styles.sectionTitle}>
+            Amenities
+          </Text>
           <View style={styles.pillRow}>
             {turf.amenities.map((amenity) => (
               <View key={amenity.id} style={[styles.pill, styles.pillAccent]}>
-                <Text style={[styles.pillText, styles.pillTextAccent]}>{amenity.name}</Text>
+                <Text variant="caption" color="info" style={styles.pillTextAccent}>
+                  {amenity.name}
+                </Text>
               </View>
             ))}
           </View>
-        </View>
+        </>
       )}
+
+      <Divider />
+
+      <Surface variant="muted" style={styles.summary}>
+        <View style={styles.summaryRow}>
+          <View>
+            <Text variant="metadata" color="muted">
+              Price
+            </Text>
+            {turf.slot_price !== undefined ? (
+              <Text variant="priceEmphasis" color="primary">
+                {`₹${turf.slot_price}`}
+                <Text variant="caption" color="muted">
+                  {turf.slot_duration_minutes ? ` / ${turf.slot_duration_minutes}-min slot` : ' / slot'}
+                </Text>
+              </Text>
+            ) : (
+              <Text variant="bodyEmphasized" color="secondary">
+                Price on request
+              </Text>
+            )}
+          </View>
+
+          <View style={styles.hoursBlock}>
+            <View style={styles.hoursRow}>
+              {openStatus !== null && (
+                <View style={[styles.statusDot, { backgroundColor: openStatus ? theme.success : theme.textMuted }]} />
+              )}
+              <Text variant="caption" color={openStatus ? 'success' : 'secondary'}>
+                {openStatus === null ? 'Hours' : openStatus ? 'Open now' : 'Closed now'}
+              </Text>
+            </View>
+            <Text variant="metadata" color="muted">{`${turf.opening_time} – ${turf.closing_time}`}</Text>
+            {turf.capacity !== undefined ? (
+              <Text variant="metadata" color="muted">{`${turf.capacity} players`}</Text>
+            ) : null}
+          </View>
+        </View>
+
+        <Button label="Book this turf" onPress={() => {}} disabled style={styles.cta} />
+        <Text variant="metadata" color="muted" style={styles.ctaNote}>
+          Slot booking is coming soon — check back for live availability.
+        </Text>
+      </Surface>
     </Screen>
   )
 }
 
-function Row({ label, value }: { label: string; value: string }) {
-  return (
-    <View style={styles.row}>
-      <Text style={styles.rowLabel}>{label}</Text>
-      <Text style={styles.rowValue}>{value}</Text>
-    </View>
-  )
-}
-
 const styles = StyleSheet.create({
-  name: { ...typography.title, color: theme.textPrimary },
-  address: { ...typography.body, color: theme.textSecondary, marginTop: spacing.xs },
-  listedBy: { ...typography.caption, color: theme.textMuted, marginTop: spacing.xs / 2 },
-  description: { ...typography.body, color: theme.textPrimary, marginTop: spacing.lg },
-  factsCard: {
-    marginTop: spacing.lg,
-    borderWidth: 1,
-    borderColor: theme.border,
-    borderRadius: 12,
-    overflow: 'hidden',
-  },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: theme.border,
-  },
-  rowLabel: { ...typography.body, color: theme.textSecondary },
-  rowValue: { ...typography.bodyMedium, color: theme.textPrimary },
-  section: { marginTop: spacing.xl },
-  sectionTitle: { ...typography.label, color: theme.textPrimary, marginBottom: spacing.sm },
-  pillRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
-  pill: { backgroundColor: theme.surfaceMuted, borderRadius: 999, paddingHorizontal: spacing.md, paddingVertical: spacing.xs },
-  pillAccent: { backgroundColor: theme.primarySurface },
-  pillText: { ...typography.caption, color: theme.textSecondary },
-  pillTextAccent: { color: theme.primaryText },
+  hero: { width: '100%', height: HERO_HEIGHT, borderRadius: radius.lg },
+  heroPlaceholder: { backgroundColor: theme.primarySurface, alignItems: 'center', justifyContent: 'center' },
+  gallery: { gap: spacing.sm, marginTop: spacing.sm },
+  thumbnail: { width: THUMBNAIL_SIZE, height: THUMBNAIL_SIZE, borderRadius: radius.sm },
+  name: { color: theme.textPrimary, marginTop: spacing.lg },
+  locationRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, marginTop: spacing.xs },
+  locationText: { flexShrink: 1 },
+  listedBy: { marginTop: spacing.xs / 2 },
+  pillRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginTop: spacing.md },
+  pill: { ...cardPresets.pill, backgroundColor: theme.surfaceMuted },
+  pillAccent: { backgroundColor: theme.infoSurface },
+  pillTextAccent: { color: theme.infoText },
+  sectionTitle: { marginBottom: 0 },
+  summary: { marginTop: spacing.lg },
+  summaryRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', gap: spacing.md },
+  hoursBlock: { alignItems: 'flex-end', gap: spacing.xs / 2 },
+  hoursRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
+  statusDot: { width: 6, height: 6, borderRadius: 3 },
+  cta: { marginTop: spacing.lg },
+  ctaNote: { textAlign: 'center', marginTop: spacing.sm },
 })
