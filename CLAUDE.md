@@ -42,11 +42,32 @@ Admin may remain a web application where appropriate.
 - Use mobile-native navigation, touch targets, forms and loading/error states.
 - Do not use browser viewport testing as a substitute for real mobile testing.
 
+## Branching Strategy
+
+- `main` is the **production** branch. Only tested, approved work lands
+  here — via `develop`, never directly from a feature branch.
+- `develop` is the **integration** branch — the second most important
+  branch after `main`. Every feature branch is created from `develop` and
+  merged back into `develop`, not into `main`.
+- Feature branches (`feature/<name>`) are where phase/task work actually
+  happens. Once a feature branch is complete, tested, and merged into
+  `develop`, **delete it** — a merged feature branch is not kept around.
+- Promoting `develop` to `main` (a release) is its own separate, explicit
+  step — not something that happens automatically when a feature merges
+  into `develop`.
+- **Never merge `develop` into `main` unless the user explicitly asks for
+  that merge, by name, in that moment.** Pushing `develop`, opening a PR
+  from `develop`, finishing a feature, or any other adjacent git activity
+  does not imply permission to merge to `main` — ask.
+- Merging into either `develop` or `main` still requires explicit user
+  approval per the rules below — this branching model changes *where*
+  things merge, not whether permission is needed to merge them.
+
 ## Development
 
 For every phase:
 1. Inspect existing code and git status.
-2. Create a feature branch from the current approved branch.
+2. Create a feature branch from `develop` (see Branching Strategy above).
 3. Implement only the requested phase.
 4. Build database + Go API + React Native UI when the feature requires all three.
 5. Run tests, builds and integration checks.
