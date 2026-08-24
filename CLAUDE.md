@@ -52,13 +52,61 @@ For every phase:
 5. Run tests, builds and integration checks.
 6. Test important mobile flows.
 7. Review git diff for unrelated changes.
-8. Commit with a clear conventional commit.
-9. Report branch, commit, changed files and verification.
+8. Follow the Git Commit Workflow below — commit only if verification passed.
+9. Report branch, commit hash, changed files and verification.
 10. STOP and ask permission to merge.
 
 Never merge without explicit user approval.
 Never push unless explicitly requested.
 Never commit unrelated changes.
+
+## Git Commit Workflow
+
+Committing completed work is a required, automatic step of finishing a
+feature/task — not an optional or separately-requested one. This applies to
+every future development task in this project.
+
+**When to commit**
+- The moment a feature/task is fully implemented AND verified, commit it.
+  Do not wait to be asked.
+- Treat the commit as the last step of "done," the same way you'd treat a
+  passing test run — a task isn't complete until it's committed.
+
+**Before committing — verify first**
+- Confirm the feature actually works: run the relevant builds/tests/
+  typechecks, and exercise the important flow (mobile flow, API call,
+  migration) per the Development steps above.
+- Confirm there are no obvious errors or regressions introduced by the
+  change.
+- Confirm there's no unfinished TODO, stub, or half-wired piece belonging
+  to this task.
+- If verification fails or something is unfinished: do NOT commit. Fix it
+  first, or if it can't be fixed now, clearly report what's blocking
+  completion instead of committing broken/partial work.
+
+**What to stage**
+- Review the actual diff (`git status`, `git diff`) before staging anything.
+- Stage only the files relevant to the completed task.
+- Never blindly run `git add .` (or `git add -A`) if the working tree could
+  contain unrelated changes — inspect first, then stage deliberately (e.g.
+  `git add <specific files>`).
+- Never commit unrelated changes, leftover debug files, or edits from a
+  different task, even if they're sitting in the working tree.
+
+**Commit shape**
+- One completed feature/task normally produces one focused commit, not a
+  scattering of intermediate WIP commits.
+- Do not create unnecessary commits for intermediate/in-progress states —
+  commit the finished, verified result.
+- Use a clear conventional commit message describing what was completed:
+  - `feat: add turf booking flow`
+  - `fix: resolve booking API timeout`
+  - `refactor: simplify booking state management`
+
+**After committing**
+- Report the commit hash and a short summary of what was committed.
+- This still does not authorize a merge or push — those remain separate,
+  explicit-approval steps per the Development workflow above.
 
 ## Current Architecture
 
