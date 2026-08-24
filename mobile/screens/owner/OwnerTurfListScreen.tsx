@@ -1,11 +1,12 @@
+import { Ionicons } from '@expo/vector-icons'
 import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs'
 import { useCallback, useEffect, useState } from 'react'
 import { FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native'
 
-import { Button, EmptyState, ErrorBanner, LoadingView, TurfCard } from '../../components'
+import { Button, EmptyState, ErrorBanner, IconContainer, LoadingView, TurfCard } from '../../components'
 import { fetchMyTurfs } from '../../services/owners'
 import { ApiError } from '../../services/api'
-import { spacing, theme, typography } from '../../theme'
+import { iconSizes, spacing, theme, typography } from '../../theme'
 import type { Turf } from '../../types/owners'
 
 type Props = BottomTabScreenProps<Record<string, object | undefined>>
@@ -65,6 +66,12 @@ export function OwnerTurfListScreen({ navigation }: Props) {
           <>
             <Text style={styles.title}>Your turfs</Text>
             <EmptyState
+              icon={
+                <IconContainer tone="muted" size="lg">
+                  <Ionicons name="person-outline" size={iconSizes.lg} color={theme.textMuted} />
+                </IconContainer>
+              }
+              title="Profile needed"
               message="Set up your owner profile before listing a turf."
               actionLabel="Create your profile"
               onAction={() => navigation.navigate('Profile')}
@@ -84,7 +91,7 @@ export function OwnerTurfListScreen({ navigation }: Props) {
         ListHeaderComponent={
           <>
             <Text style={styles.title}>Your turfs</Text>
-            <ErrorBanner message={state.message} />
+            <ErrorBanner message={state.message} onRetry={() => void load()} />
           </>
         }
       />
@@ -101,6 +108,12 @@ export function OwnerTurfListScreen({ navigation }: Props) {
       ItemSeparatorComponent={() => <View style={styles.separator} />}
       ListEmptyComponent={
         <EmptyState
+          icon={
+            <IconContainer tone="muted" size="lg">
+              <Ionicons name="location-outline" size={iconSizes.lg} color={theme.textMuted} />
+            </IconContainer>
+          }
+          title="No turfs listed"
           message="You have not listed a turf yet."
           actionLabel="List your first turf"
           onAction={() => navigation.navigate('OwnerTurfEdit', {})}

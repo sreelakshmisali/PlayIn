@@ -1,11 +1,12 @@
+import { Ionicons } from '@expo/vector-icons'
 import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs'
 import { useCallback, useEffect, useState } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 
-import { Button, EmptyState, ErrorBanner, LoadingView, Screen } from '../../components'
+import { Button, EmptyState, ErrorBanner, IconContainer, LoadingView, Screen } from '../../components'
 import { fetchMyPlayerProfile } from '../../services/players'
 import { ApiError } from '../../services/api'
-import { spacing, theme, typography } from '../../theme'
+import { iconSizes, spacing, theme, typography } from '../../theme'
 import type { PlayerProfile } from '../../types/players'
 
 type Props = BottomTabScreenProps<Record<string, object | undefined>>
@@ -46,6 +47,12 @@ export function PlayerProfileScreen({ navigation }: Props) {
     return (
       <Screen scroll={false}>
         <EmptyState
+          icon={
+            <IconContainer tone="muted" size="lg">
+              <Ionicons name="person-outline" size={iconSizes.lg} color={theme.textMuted} />
+            </IconContainer>
+          }
+          title="No profile yet"
           message="You haven't set up your player profile yet."
           actionLabel="Create your profile"
           onAction={() => navigation.navigate('PlayerProfileEdit')}
@@ -57,7 +64,7 @@ export function PlayerProfileScreen({ navigation }: Props) {
   if (state.kind === 'failed') {
     return (
       <Screen scroll={false}>
-        <ErrorBanner message={state.message} />
+        <ErrorBanner message={state.message} onRetry={load} />
       </Screen>
     )
   }

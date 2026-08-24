@@ -138,9 +138,16 @@ export function HomeScreen({ navigation }: Props) {
         </View>
 
         {state.kind === 'loading' && <LoadingView size="small" inline message="Loading turfs" />}
-        {state.kind === 'failed' && <ErrorBanner message={state.message} />}
+        {state.kind === 'failed' && <ErrorBanner message={state.message} onRetry={() => void load()} />}
         {state.kind === 'ready' && state.turfs.length === 0 && (
-          <EmptyState message="No turfs are listed yet. Check back soon." />
+          <EmptyState
+            icon={
+              <IconContainer tone="muted" size="lg">
+                <Ionicons name="location-outline" size={iconSizes.lg} color={theme.textMuted} />
+              </IconContainer>
+            }
+            message="No turfs are listed yet. Check back soon."
+          />
         )}
         {state.kind === 'ready' && state.turfs.length > 0 && (
           <View style={styles.turfList}>

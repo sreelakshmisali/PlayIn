@@ -1,11 +1,12 @@
+import { Ionicons } from '@expo/vector-icons'
 import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs'
 import { useCallback, useEffect, useState } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 
-import { Button, EmptyState, ErrorBanner, LoadingView, Screen } from '../../components'
+import { Button, EmptyState, ErrorBanner, IconContainer, LoadingView, Screen } from '../../components'
 import { fetchMyOwnerProfile } from '../../services/owners'
 import { ApiError } from '../../services/api'
-import { spacing, theme, typography } from '../../theme'
+import { iconSizes, spacing, theme, typography } from '../../theme'
 import type { OwnerProfile } from '../../types/owners'
 
 type Props = BottomTabScreenProps<Record<string, object | undefined>>
@@ -46,6 +47,12 @@ export function OwnerProfileScreen({ navigation }: Props) {
     return (
       <Screen scroll={false}>
         <EmptyState
+          icon={
+            <IconContainer tone="muted" size="lg">
+              <Ionicons name="person-outline" size={iconSizes.lg} color={theme.textMuted} />
+            </IconContainer>
+          }
+          title="No profile yet"
           message="Set up your owner profile before listing a turf."
           actionLabel="Create your profile"
           onAction={() => navigation.navigate('OwnerProfileEdit')}
@@ -57,7 +64,7 @@ export function OwnerProfileScreen({ navigation }: Props) {
   if (state.kind === 'failed') {
     return (
       <Screen scroll={false}>
-        <ErrorBanner message={state.message} />
+        <ErrorBanner message={state.message} onRetry={load} />
       </Screen>
     )
   }

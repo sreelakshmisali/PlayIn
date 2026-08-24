@@ -1,8 +1,8 @@
 import { Ionicons } from '@expo/vector-icons'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Image, ScrollView, StyleSheet, View } from 'react-native'
 
-import { Button, Divider, EmptyState, ErrorBanner, LoadingView, Screen, Surface, Text } from '../../components'
+import { Button, Divider, EmptyState, ErrorBanner, IconContainer, LoadingView, Screen, Surface, Text } from '../../components'
 import { fetchPublicTurf } from '../../services/owners'
 import { ApiError } from '../../services/api'
 import { cardPresets, iconSizes, radius, spacing, theme } from '../../theme'
@@ -15,7 +15,11 @@ interface Props {
   route: { params: { turfId: string } }
 }
 
-type State = { kind: 'loading' } | { kind: 'ready'; turf: Turf } | { kind: 'missing' } | { kind: 'failed'; message: string }
+type State =
+  | { kind: 'loading' }
+  | { kind: 'ready'; turf: Turf }
+  | { kind: 'missing' }
+  | { kind: 'failed'; message: string; isNetworkError: boolean }
 
 const HERO_HEIGHT = 200
 const THUMBNAIL_SIZE = 56
@@ -48,7 +52,7 @@ export function TurfDetailScreen({ route }: Props) {
   const { turfId } = route.params
   const [state, setState] = useState<State>({ kind: 'loading' })
 
-  useEffect(() => {
+  const load = useCallback(() => {
     let cancelled = false
     setState({ kind: 'loading' })
 
@@ -62,13 +66,21 @@ export function TurfDetailScreen({ route }: Props) {
           setState({ kind: 'missing' })
           return
         }
-        setState({ kind: 'failed', message: error instanceof ApiError ? error.message : 'Could not load this turf.' })
+        setState({
+          kind: 'failed',
+          message: error instanceof ApiError ? error.message : 'Could not load this turf.',
+          isNetworkError: error instanceof ApiError && error.isNetworkError,
+        })
       })
 
     return () => {
       cancelled = true
     }
   }, [turfId])
+
+  useEffect(() => {
+    return load()
+  }, [load])
 
   if (state.kind === 'loading') {
     return <LoadingView message="Loading turf" />
@@ -77,7 +89,15 @@ export function TurfDetailScreen({ route }: Props) {
   if (state.kind === 'missing') {
     return (
       <Screen scroll={false}>
-        <EmptyState message="This turf does not exist, or is not open for booking yet." />
+        <EmptyState
+          title="Turf not found"
+          message="This turf does not exist, or is not open for booking yet."
+          icon={
+            <IconContainer tone="muted" size="lg">
+              <Ionicons name="location-outline" size={iconSizes.lg} color={theme.textMuted} />
+            </IconContainer>
+          }
+        />
       </Screen>
     )
   }
@@ -85,7 +105,11 @@ export function TurfDetailScreen({ route }: Props) {
   if (state.kind === 'failed') {
     return (
       <Screen scroll={false}>
-        <ErrorBanner message={state.message} />
+        <ErrorBanner
+          message={state.message}
+          onRetry={load}
+          kind={state.isNetworkError ? 'network' : 'generic'}
+        />
       </Screen>
     )
   }

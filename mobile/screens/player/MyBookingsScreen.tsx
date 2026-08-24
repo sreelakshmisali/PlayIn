@@ -185,10 +185,22 @@ function TabBar({ active, counts, onSelect }: { active: Tab; counts: Record<Tab,
 // Empty states per tab
 // ---------------------------------------------------------------------------
 
-const EMPTY_MESSAGES: Record<Tab, { message: string; icon: keyof typeof Ionicons.glyphMap }> = {
-  upcoming: { message: 'No upcoming bookings. Browse turfs to find your next game.', icon: 'calendar-outline' },
-  past: { message: 'No past bookings yet. Your completed sessions will show here.', icon: 'time-outline' },
-  cancelled: { message: 'No cancelled bookings.', icon: 'close-circle-outline' },
+const EMPTY_MESSAGES: Record<Tab, { title: string; message: string; icon: keyof typeof Ionicons.glyphMap }> = {
+  upcoming: {
+    title: 'No upcoming bookings',
+    message: 'Browse turfs to find your next game.',
+    icon: 'calendar-outline',
+  },
+  past: {
+    title: 'No past bookings',
+    message: 'Your completed sessions will show here.',
+    icon: 'time-outline',
+  },
+  cancelled: {
+    title: 'No cancelled bookings',
+    message: 'Cancelled sessions will show here.',
+    icon: 'close-circle-outline',
+  },
 }
 
 // ---------------------------------------------------------------------------
@@ -198,7 +210,7 @@ const EMPTY_MESSAGES: Record<Tab, { message: string; icon: keyof typeof Ionicons
 type State =
   | { kind: 'loading' }
   | { kind: 'ready'; bookings: Booking[] }
-  | { kind: 'failed'; message: string }
+  | { kind: 'failed'; message: string; isNetworkError: boolean }
 
 export function MyBookingsScreen() {
   const [state, setState] = useState<State>({ kind: 'loading' })
@@ -212,6 +224,7 @@ export function MyBookingsScreen() {
         setState({
           kind: 'failed',
           message: error instanceof ApiError ? error.message : 'Could not load your bookings.',
+          isNetworkError: error instanceof ApiError && error.isNetworkError,
         })
       })
   }, [])
@@ -225,7 +238,7 @@ export function MyBookingsScreen() {
   if (state.kind === 'failed') {
     return (
       <Screen scroll={false}>
-        <ErrorBanner message={state.message} />
+        <ErrorBanner message={state.message} onRetry={load} kind={state.isNetworkError ? 'network' : 'generic'} />
       </Screen>
     )
   }
@@ -259,6 +272,7 @@ export function MyBookingsScreen() {
       {filtered.length === 0 ? (
         <View style={styles.emptyContainer}>
           <EmptyState
+            title={empty.title}
             message={empty.message}
             icon={
               <IconContainer tone="muted" size="lg">

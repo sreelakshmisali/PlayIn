@@ -1,6 +1,9 @@
+import { Ionicons } from '@expo/vector-icons'
 import { Pressable, StyleSheet, View } from 'react-native'
 
-import { radius, spacing, theme } from '../theme'
+import { iconSizes, radius, spacing, theme } from '../theme'
+import { EmptyState } from './EmptyState'
+import { IconContainer } from './IconContainer'
 import { Text } from './Text'
 
 /**
@@ -45,6 +48,20 @@ interface TimeSlotGridProps {
  * a glance across the grid is enough to find what's open.
  */
 export function TimeSlotGrid({ slots, selectedSlotId, onSelectSlot }: TimeSlotGridProps) {
+  if (slots.length === 0) {
+    return (
+      <EmptyState
+        icon={
+          <IconContainer tone="muted" size="lg">
+            <Ionicons name="time-outline" size={iconSizes.lg} color={theme.textMuted} />
+          </IconContainer>
+        }
+        title="No slots available"
+        message="There are no bookable time slots for this date. Try another day."
+      />
+    )
+  }
+
   return (
     <View style={styles.grid}>
       {slots.map((slot) => {
