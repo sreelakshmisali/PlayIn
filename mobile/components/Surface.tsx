@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
-import { Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native'
+import { Animated, Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native'
 
+import { usePressScale } from '../hooks'
 import { cardPresets, theme } from '../theme'
 
 type Variant = 'card' | 'muted' | 'elevated'
@@ -10,6 +11,8 @@ const variantStyle: Record<Variant, ViewStyle> = {
   muted: cardPresets.surfaceMuted,
   elevated: cardPresets.elevated,
 }
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable)
 
 interface SurfaceProps {
   children: ReactNode
@@ -26,19 +29,29 @@ interface SurfaceProps {
   accessibilityLabel?: string
 }
 
-/** The one card/surface container every screen uses. See `variant` above
- * for which one to reach for. */
+/**
+ * The one card/surface container every screen uses. See `variant` above
+ * for which one to reach for. A tappable surface gets a small, fast scale
+ * dip on press (see `usePressScale`) alongside the existing muted-fill
+ * pressed state — the same feedback `Button` uses, so a turf card and a
+ * primary button feel like the same interactive language. Skipped under
+ * Reduce Motion.
+ */
 export function Surface({ children, variant = 'card', onPress, style, accessibilityLabel }: SurfaceProps) {
+  const { animatedStyle, onPressIn, onPressOut } = usePressScale()
+
   if (onPress) {
     return (
-      <Pressable
+      <AnimatedPressable
         onPress={onPress}
+        onPressIn={onPressIn}
+        onPressOut={onPressOut}
         accessibilityRole="button"
         accessibilityLabel={accessibilityLabel}
-        style={({ pressed }) => [variantStyle[variant], pressed && styles.pressed, style]}
+        style={({ pressed }: { pressed: boolean }) => [variantStyle[variant], pressed && styles.pressed, animatedStyle, style]}
       >
         {children}
-      </Pressable>
+      </AnimatedPressable>
     )
   }
 

@@ -1,7 +1,9 @@
 import { Ionicons } from '@expo/vector-icons'
-import { StyleSheet, View } from 'react-native'
+import { useEffect, useRef } from 'react'
+import { Animated, StyleSheet, View } from 'react-native'
 
-import { iconSizes, spacing, theme } from '../theme'
+import { useReducedMotion } from '../hooks'
+import { durations, easings, iconSizes, spacing, theme } from '../theme'
 import { Divider } from './Divider'
 import { IconContainer } from './IconContainer'
 import { Surface } from './Surface'
@@ -76,12 +78,39 @@ export function BookingSummary({ details, onConfirm, pending = false, disabled =
   const timeValue = endTime ? `${details.startTime} – ${endTime}` : details.startTime
   const priceLabel = details.price !== undefined ? `₹${details.price}` : 'Price on request'
 
+  const reducedMotion = useReducedMotion()
+  const checkOpacity = useRef(new Animated.Value(reducedMotion ? 1 : 0)).current
+  const checkScale = useRef(new Animated.Value(reducedMotion ? 1 : 0.8)).current
+
+  useEffect(() => {
+    if (reducedMotion) return
+    // A quiet arrival for the one icon that signals "this is confirmable" —
+    // fires once, on mount, not on every re-render as fields update.
+    Animated.parallel([
+      Animated.timing(checkOpacity, {
+        toValue: 1,
+        duration: durations.base,
+        easing: easings.standard,
+        useNativeDriver: true,
+      }),
+      Animated.timing(checkScale, {
+        toValue: 1,
+        duration: durations.base,
+        easing: easings.decelerate,
+        useNativeDriver: true,
+      }),
+    ]).start()
+    // checkOpacity/checkScale are stable refs — only reducedMotion should retrigger this.
+  }, [reducedMotion])
+
   return (
     <Surface variant="card">
       <View style={styles.header}>
-        <IconContainer tone="primary" size="md">
-          <Ionicons name="checkmark-circle-outline" size={iconSizes.md} color={theme.primary} />
-        </IconContainer>
+        <Animated.View style={{ opacity: checkOpacity, transform: [{ scale: checkScale }] }}>
+          <IconContainer tone="primary" size="md">
+            <Ionicons name="checkmark-circle-outline" size={iconSizes.md} color={theme.primary} />
+          </IconContainer>
+        </Animated.View>
         <View style={styles.headerText}>
           <Text variant="sectionTitle">Review your booking</Text>
           <Text variant="caption" color="secondary" numberOfLines={1}>

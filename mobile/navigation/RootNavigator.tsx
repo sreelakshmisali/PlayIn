@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Animated, StyleSheet } from 'react-native'
 
-import { useAuth } from '../hooks'
+import { useAuth, useReducedMotion } from '../hooks'
 import { NotAvailableScreen, SplashScreen } from '../screens'
 import { durations, easings } from '../theme'
 import { AuthNavigator } from './AuthNavigator'
@@ -25,9 +25,17 @@ export function RootNavigator() {
   // exactly as before.
   const [showSplash, setShowSplash] = useState(true)
   const splashOpacity = useRef(new Animated.Value(1)).current
+  const reducedMotion = useReducedMotion()
 
   useEffect(() => {
     if (status === 'loading' || !showSplash) return
+
+    // Under Reduce Motion, drop the splash immediately rather than
+    // crossfading it out — same end state, no animated transform/opacity.
+    if (reducedMotion) {
+      setShowSplash(false)
+      return
+    }
 
     Animated.timing(splashOpacity, {
       toValue: 0,
@@ -35,7 +43,7 @@ export function RootNavigator() {
       easing: easings.standard,
       useNativeDriver: true,
     }).start(() => setShowSplash(false))
-  }, [status, showSplash, splashOpacity])
+  }, [status, showSplash, splashOpacity, reducedMotion])
 
   if (status === 'loading') {
     return <SplashScreen />

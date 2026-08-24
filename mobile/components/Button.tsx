@@ -1,8 +1,11 @@
-import { ActivityIndicator, Pressable, StyleSheet, Text, type StyleProp, type ViewStyle } from 'react-native'
+import { ActivityIndicator, Animated, Pressable, StyleSheet, Text, type StyleProp, type ViewStyle } from 'react-native'
 
+import { usePressScale } from '../hooks'
 import { buttonPresets, theme, typography } from '../theme'
 
 type Variant = 'primary' | 'secondary' | 'danger'
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable)
 
 interface ButtonProps {
   label: string
@@ -23,21 +26,29 @@ interface ButtonProps {
  * minimum height keeps every button a comfortable thumb target regardless
  * of label length, and the pending state disables the press target rather
  * than hiding it, so a double-tap during a submit cannot fire twice.
+ *
+ * Press feedback is a small, fast scale-down (see `usePressScale`) layered
+ * on top of the existing opacity dip — acknowledges the tap without any
+ * bounce, and is skipped under Reduce Motion.
  */
 export function Button({ label, onPress, variant = 'primary', pending = false, disabled = false, style }: ButtonProps) {
   const isDisabled = pending || disabled
+  const { animatedStyle, onPressIn, onPressOut } = usePressScale()
 
   return (
-    <Pressable
+    <AnimatedPressable
       onPress={onPress}
+      onPressIn={isDisabled ? undefined : onPressIn}
+      onPressOut={isDisabled ? undefined : onPressOut}
       disabled={isDisabled}
       accessibilityRole="button"
       accessibilityState={{ disabled: isDisabled, busy: pending }}
-      style={({ pressed }) => [
+      style={({ pressed }: { pressed: boolean }) => [
         styles.base,
         buttonPresets.variant[variant],
         isDisabled && styles.disabled,
         pressed && !isDisabled && styles.pressed,
+        animatedStyle,
         style,
       ]}
     >
@@ -46,7 +57,7 @@ export function Button({ label, onPress, variant = 'primary', pending = false, d
       ) : (
         <Text style={[styles.label, { color: buttonPresets.labelColor[variant] }]}>{label}</Text>
       )}
-    </Pressable>
+    </AnimatedPressable>
   )
 }
 

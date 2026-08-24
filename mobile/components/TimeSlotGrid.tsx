@@ -1,7 +1,9 @@
 import { Ionicons } from '@expo/vector-icons'
-import { Pressable, StyleSheet, View } from 'react-native'
+import { useEffect, useRef } from 'react'
+import { Animated, Pressable, StyleSheet, View } from 'react-native'
 
-import { iconSizes, radius, spacing, theme } from '../theme'
+import { useReducedMotion } from '../hooks'
+import { durations, easings, iconSizes, radius, spacing, theme } from '../theme'
 import { EmptyState } from './EmptyState'
 import { IconContainer } from './IconContainer'
 import { Text } from './Text'
@@ -35,6 +37,77 @@ export function slotDisplayState(slot: { status: string; available: boolean }): 
   return slot.available ? 'AVAILABLE' : 'UNAVAILABLE'
 }
 
+/** How far a cell pops on selection — mirrors `DateStrip`'s own pulse, so
+ * every "pick one of these" control in the booking flow feels identical. */
+const SELECT_PULSE_SCALE = 1.06
+
+interface SlotCellProps {
+  slot: TimeSlotOption
+  state: TimeSlotState
+  onPress: () => void
+}
+
+/** One slot cell. Owns its own selection-pulse animation, fired only on
+ * the transition into `SELECTED` — never on every render, never on
+ * deselection. Skipped under Reduce Motion. */
+function SlotCell({ slot, state, onPress }: SlotCellProps) {
+  const reducedMotion = useReducedMotion()
+  const scale = useRef(new Animated.Value(1)).current
+  const wasSelected = useRef(state === 'SELECTED')
+  const isDisabled = state === 'BOOKED' || state === 'UNAVAILABLE'
+
+  useEffect(() => {
+    const isSelected = state === 'SELECTED'
+    if (isSelected && !wasSelected.current && !reducedMotion) {
+      Animated.sequence([
+        Animated.timing(scale, {
+          toValue: SELECT_PULSE_SCALE,
+          duration: durations.fast,
+          easing: easings.decelerate,
+          useNativeDriver: true,
+        }),
+        Animated.timing(scale, {
+          toValue: 1,
+          duration: durations.fast,
+          easing: easings.standard,
+          useNativeDriver: true,
+        }),
+      ]).start()
+    }
+    wasSelected.current = isSelected
+  }, [state, reducedMotion, scale])
+
+  return (
+    <Animated.View style={{ transform: [{ scale }] }}>
+      <Pressable
+        onPress={onPress}
+        disabled={isDisabled}
+        accessibilityRole="button"
+        accessibilityState={{ selected: state === 'SELECTED', disabled: isDisabled }}
+        accessibilityLabel={`${slot.startTime}${state === 'BOOKED' ? ', already booked' : state === 'UNAVAILABLE' ? ', unavailable' : ''}`}
+        style={[
+          styles.cell,
+          state === 'SELECTED' && styles.cellSelected,
+          (state === 'BOOKED' || state === 'UNAVAILABLE') && styles.cellDisabled,
+        ]}
+      >
+        <Text
+          variant="bodyEmphasized"
+          color={state === 'SELECTED' ? 'onPrimary' : isDisabled ? 'disabled' : 'primary'}
+          style={[state === 'BOOKED' && styles.bookedLabel]}
+        >
+          {slot.startTime}
+        </Text>
+        {state === 'BOOKED' && (
+          <Text variant="metadata" color="disabled">
+            Booked
+          </Text>
+        )}
+      </Pressable>
+    </Animated.View>
+  )
+}
+
 interface TimeSlotGridProps {
   slots: TimeSlotOption[]
   selectedSlotId: string | null
@@ -45,7 +118,10 @@ interface TimeSlotGridProps {
  * A compact, wrapping grid of time slots for one date — built for scanning
  * a whole day's slots at once, not a scrolling list. Every cell uses the
  * same shape and label; only fill, border and text communicate state, so
- * a glance across the grid is enough to find what's open.
+ * a glance across the grid is enough to find what's open. Selecting a
+ * slot gives it the same brief pulse `DateStrip` uses for a selected date.
+ * Renders the shared `EmptyState` ("No slots available") when a date has
+ * zero slots, instead of an empty grid.
  */
 export function TimeSlotGrid({ slots, selectedSlotId, onSelectSlot }: TimeSlotGridProps) {
   if (slots.length === 0) {
@@ -66,36 +142,7 @@ export function TimeSlotGrid({ slots, selectedSlotId, onSelectSlot }: TimeSlotGr
     <View style={styles.grid}>
       {slots.map((slot) => {
         const state: TimeSlotState = slot.id === selectedSlotId ? 'SELECTED' : slot.state
-        const isDisabled = state === 'BOOKED' || state === 'UNAVAILABLE'
-
-        return (
-          <Pressable
-            key={slot.id}
-            onPress={() => onSelectSlot(slot.id)}
-            disabled={isDisabled}
-            accessibilityRole="button"
-            accessibilityState={{ selected: state === 'SELECTED', disabled: isDisabled }}
-            accessibilityLabel={`${slot.startTime}${state === 'BOOKED' ? ', already booked' : state === 'UNAVAILABLE' ? ', unavailable' : ''}`}
-            style={[
-              styles.cell,
-              state === 'SELECTED' && styles.cellSelected,
-              (state === 'BOOKED' || state === 'UNAVAILABLE') && styles.cellDisabled,
-            ]}
-          >
-            <Text
-              variant="bodyEmphasized"
-              color={state === 'SELECTED' ? 'onPrimary' : isDisabled ? 'disabled' : 'primary'}
-              style={[state === 'BOOKED' && styles.bookedLabel]}
-            >
-              {slot.startTime}
-            </Text>
-            {state === 'BOOKED' && (
-              <Text variant="metadata" color="disabled">
-                Booked
-              </Text>
-            )}
-          </Pressable>
-        )
+        return <SlotCell key={slot.id} slot={slot} state={state} onPress={() => onSelectSlot(slot.id)} />
       })}
     </View>
   )
