@@ -1,6 +1,7 @@
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native'
+import { ActivityIndicator, StyleSheet, View } from 'react-native'
 
-import { spacing, theme, typography } from '../theme'
+import { spacing, theme } from '../theme'
+import { Text } from './Text'
 
 interface LoadingViewProps {
   message?: string
@@ -13,18 +14,36 @@ interface LoadingViewProps {
   inline?: boolean
 }
 
-/** A centred spinner with an optional message. */
+/**
+ * A centered spinner with an optional message. Uses the same vertical
+ * centering and text hierarchy as `EmptyState` and `ErrorBanner` so that
+ * loading → loaded and loading → error transitions don't jolt the layout.
+ */
 export function LoadingView({ message, size = 'large', inline = false }: LoadingViewProps) {
   return (
     <View style={[styles.container, inline && styles.inline]} accessibilityRole="progressbar">
       <ActivityIndicator color={theme.primary} size={size} />
-      {message ? <Text style={styles.message}>{message}</Text> : null}
+      {message ? (
+        <Text variant="body" color="secondary" style={styles.message}>
+          {message}
+        </Text>
+      ) : null}
     </View>
   )
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: spacing.md },
-  inline: { flex: 0, paddingVertical: spacing.lg },
-  message: { ...typography.body, color: theme.textSecondary },
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.md,
+  },
+  inline: {
+    flex: 0,
+    paddingVertical: spacing.xl,
+  },
+  message: {
+    textAlign: 'center',
+  },
 })

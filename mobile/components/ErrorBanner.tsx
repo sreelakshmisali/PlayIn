@@ -1,27 +1,119 @@
-import { StyleSheet, Text, View } from 'react-native'
+import { Ionicons } from '@expo/vector-icons'
+import { StyleSheet, View } from 'react-native'
 
-import { radius, spacing, theme, typography } from '../theme'
+import { iconSizes, radius, spacing, theme } from '../theme'
+import { Button } from './Button'
+import { Text } from './Text'
+
+/** Which failure this is, purely for icon/headline — the caller decides
+ * this from information it already has (e.g. `ApiError.isNetworkError`);
+ * this component never inspects the error itself. */
+type ErrorKind = 'generic' | 'network'
+
+const KIND_CONFIG: Record<ErrorKind, { title: string; icon: keyof typeof Ionicons.glyphMap }> = {
+  generic: { title: 'Something went wrong', icon: 'alert-circle-outline' },
+  network: { title: "Can't connect", icon: 'cloud-offline-outline' },
+}
+
+interface ErrorBannerProps {
+  message: string
+  /** Optional retry action. When provided, a "Try again" button appears
+   * below the message. The caller wires this to whatever load function
+   * originally failed — the banner does not manage retry state. */
+  onRetry?: () => void
+  /** Override the retry button label. Defaults to "Try again". */
+  retryLabel?: string
+  /** 'generic' (default) or 'network' — swaps the icon and headline for a
+   * connectivity failure (e.g. when the caught error's `isNetworkError` is
+   * true). Only affects the full, `onRetry` layout. */
+  kind?: ErrorKind
+}
 
 /**
- * The form- or screen-level failure message: the one a field error cannot
- * express, such as wrong credentials or an unreachable API.
+ * An inline error surface for screen-level or section-level failures: a
+ * network timeout, a failed fetch, an unexpected server error. Not for
+ * field validation (that lives on `TextField`).
+ *
+ * Two visual modes, chosen automatically by whether `onRetry` is passed:
+ * - Without retry: a compact tinted banner, same as before, for errors
+ *   shown alongside other content (e.g. a form's top-level error).
+ * - With retry: a slightly more spacious layout with icon and CTA, for
+ *   errors that replace the screen's content entirely. `kind` further
+ *   distinguishes a connectivity failure from any other server/unexpected
+ *   error.
  */
-export function ErrorBanner({ message }: { message: string }) {
+export function ErrorBanner({ message, onRetry, retryLabel = 'Try again', kind = 'generic' }: ErrorBannerProps) {
+  if (onRetry) {
+    const config = KIND_CONFIG[kind]
+    return (
+      <View style={styles.fullContainer} accessibilityRole="alert">
+        <View style={styles.iconCircle}>
+          <Ionicons name={config.icon} size={iconSizes.lg} color={theme.danger} />
+        </View>
+        <Text variant="sectionTitle" color="primary" style={styles.title}>
+          {config.title}
+        </Text>
+        <Text variant="body" color="secondary" style={styles.message}>
+          {message}
+        </Text>
+        <View style={styles.retryAction}>
+          <Button label={retryLabel} onPress={onRetry} variant="secondary" />
+        </View>
+      </View>
+    )
+  }
+
   return (
-    <View style={styles.container} accessibilityRole="alert">
-      <Text style={styles.message}>{message}</Text>
+    <View style={styles.bannerContainer} accessibilityRole="alert">
+      <Ionicons name="alert-circle-outline" size={iconSizes.sm} color={theme.danger} />
+      <Text variant="body" style={styles.bannerText}>
+        {message}
+      </Text>
     </View>
   )
 }
 
 const styles = StyleSheet.create({
-  container: {
+  // Compact inline banner (no retry)
+  bannerContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: spacing.sm,
     backgroundColor: theme.dangerSurface,
-    borderWidth: 1,
-    borderColor: theme.dangerBorder,
     borderRadius: radius.md,
     padding: spacing.md,
     marginBottom: spacing.lg,
   },
-  message: { ...typography.body, color: theme.dangerText },
+  bannerText: {
+    flex: 1,
+    color: theme.dangerText,
+  },
+
+  // Full error state (with retry)
+  fullContainer: {
+    paddingVertical: spacing.xxl,
+    paddingHorizontal: spacing.lg,
+    alignItems: 'center',
+  },
+  iconCircle: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: theme.dangerSurface,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.lg,
+  },
+  title: {
+    textAlign: 'center',
+    marginBottom: spacing.xs,
+  },
+  message: {
+    textAlign: 'center',
+    maxWidth: 280,
+  },
+  retryAction: {
+    marginTop: spacing.xl,
+    alignSelf: 'stretch',
+  },
 })

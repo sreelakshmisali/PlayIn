@@ -3,7 +3,7 @@ import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { FlatList, Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native'
 
-import { EmptyState, ErrorBanner, LoadingView, Text, TurfCard } from '../../components'
+import { EmptyState, ErrorBanner, IconContainer, LoadingView, Text, TurfCard } from '../../components'
 import { fetchPublicTurfs } from '../../services/owners'
 import { ApiError } from '../../services/api'
 import { iconSizes, radius, spacing, theme } from '../../theme'
@@ -13,7 +13,10 @@ import type { SportRef, Turf } from '../../types/owners'
 // two different tab param lists that share this route name but nothing else.
 type Props = BottomTabScreenProps<Record<string, object | undefined>>
 
-type State = { kind: 'loading' } | { kind: 'ready'; turfs: Turf[] } | { kind: 'failed'; message: string }
+type State =
+  | { kind: 'loading' }
+  | { kind: 'ready'; turfs: Turf[] }
+  | { kind: 'failed'; message: string; isNetworkError: boolean }
 
 type SortKey = 'name' | 'price'
 
@@ -39,6 +42,7 @@ export function TurfListScreen({ navigation }: Props) {
       setState({
         kind: 'failed',
         message: error instanceof ApiError ? error.message : 'Could not load turfs.',
+        isNetworkError: error instanceof ApiError && error.isNetworkError,
       })
     } finally {
       if (isRefresh) setRefreshing(false)
@@ -80,7 +84,11 @@ export function TurfListScreen({ navigation }: Props) {
             <Text variant="screenTitle" style={styles.title}>
               Turfs
             </Text>
-            <ErrorBanner message={state.message} />
+            <ErrorBanner
+              message={state.message}
+              onRetry={() => void load()}
+              kind={state.isNetworkError ? 'network' : 'generic'}
+            />
           </>
         }
       />
@@ -133,6 +141,12 @@ export function TurfListScreen({ navigation }: Props) {
       ItemSeparatorComponent={() => <View style={styles.separator} />}
       ListEmptyComponent={
         <EmptyState
+          icon={
+            <IconContainer tone="muted" size="lg">
+              <Ionicons name="location-outline" size={iconSizes.lg} color={theme.textMuted} />
+            </IconContainer>
+          }
+          title={allTurfs.length === 0 ? 'No turfs yet' : 'No results'}
           message={
             allTurfs.length === 0
               ? 'No turfs are listed yet. Check back soon.'
