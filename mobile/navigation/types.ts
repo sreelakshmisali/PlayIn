@@ -6,6 +6,7 @@ export type AuthStackParamList = {
 export type PlayerTabParamList = {
   Home: undefined
   Turfs: undefined
+  Bookings: undefined
   Profile: undefined
   Account: undefined
 }
