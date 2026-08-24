@@ -16,7 +16,13 @@ import { fontSizes, fontWeights, theme, typography } from '../theme'
 /** Applied as every stack navigator's `screenOptions`. A flat white header
  * with no shadow/border, a centered title in the app's own type scale, and
  * a chevron-only back button tinted with the brand accent — the one place
- * green appears in the shell, and only as an icon tint, never a filled bar. */
+ * green appears in the shell, and only as an icon tint, never a filled bar.
+ *
+ * `animation` is left at native-stack's platform default (a native
+ * push/pop on iOS, a native fade-through on Android) rather than a custom
+ * curve: it's already GPU-driven, respects the OS's own Reduce Motion
+ * setting automatically, and is faster/smoother than anything hand-rolled
+ * here would be — exactly what "fast, smooth, subtle" asks for. */
 export const stackScreenOptions: NativeStackNavigationOptions = {
   headerStyle: { backgroundColor: theme.background },
   headerShadowVisible: false,

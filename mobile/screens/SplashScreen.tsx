@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { Animated, StyleSheet, View } from 'react-native'
 
+import { useReducedMotion } from '../hooks'
 import { durations, easings, theme, typography } from '../theme'
 
 interface SplashScreenProps {
@@ -21,12 +22,17 @@ interface SplashScreenProps {
  * mark in place, without touching the animation around it.
  */
 export function SplashScreen({ animateIn = true }: SplashScreenProps) {
-  const atmosphere = useRef(new Animated.Value(animateIn ? 0 : 1)).current
-  const wordmarkOpacity = useRef(new Animated.Value(animateIn ? 0 : 1)).current
-  const wordmarkScale = useRef(new Animated.Value(animateIn ? 0.92 : 1)).current
+  const reducedMotion = useReducedMotion()
+  // Under Reduce Motion, skip the entrance choreography entirely and start
+  // already in the settled end state — same outcome as `animateIn={false}`.
+  const shouldAnimateIn = animateIn && !reducedMotion
+
+  const atmosphere = useRef(new Animated.Value(shouldAnimateIn ? 0 : 1)).current
+  const wordmarkOpacity = useRef(new Animated.Value(shouldAnimateIn ? 0 : 1)).current
+  const wordmarkScale = useRef(new Animated.Value(shouldAnimateIn ? 0.92 : 1)).current
 
   useEffect(() => {
-    if (!animateIn) return
+    if (!shouldAnimateIn) return
 
     // 2. A very subtle fade for the background atmosphere, starting immediately.
     Animated.timing(atmosphere, {
@@ -57,7 +63,7 @@ export function SplashScreen({ animateIn = true }: SplashScreenProps) {
         }),
       ]),
     ]).start()
-  }, [animateIn, atmosphere, wordmarkOpacity, wordmarkScale])
+  }, [shouldAnimateIn, atmosphere, wordmarkOpacity, wordmarkScale])
 
   return (
     <View style={styles.container}>

@@ -1,6 +1,8 @@
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native'
+import { useEffect, useRef } from 'react'
+import { Animated, Pressable, ScrollView, StyleSheet, View } from 'react-native'
 
-import { radius, spacing, theme } from '../theme'
+import { useReducedMotion } from '../hooks'
+import { durations, easings, radius, spacing, theme } from '../theme'
 import { Text } from './Text'
 
 /** A date as `YYYY-MM-DD`, matching the format the backend's availability
@@ -36,6 +38,76 @@ function describe(date: DateStripDate) {
   }
 }
 
+const CELL_WIDTH = 52
+/** How far a cell pops on selection — small enough to read as
+ * acknowledgment, not a bounce. */
+const SELECT_PULSE_SCALE = 1.06
+
+interface DateCellProps {
+  date: DateStripDate
+  weekday: string
+  day: number
+  isToday: boolean
+  isSelected: boolean
+  isDisabled: boolean
+  onPress: () => void
+}
+
+/** One date cell. Owns its own small selection-pulse animation — a quick
+ * scale up and back down, fired only on the transition into `isSelected`,
+ * never on every render or on deselection. Skipped under Reduce Motion. */
+function DateCell({ date, weekday, day, isToday, isSelected, isDisabled, onPress }: DateCellProps) {
+  const reducedMotion = useReducedMotion()
+  const scale = useRef(new Animated.Value(1)).current
+  const wasSelected = useRef(isSelected)
+
+  useEffect(() => {
+    if (isSelected && !wasSelected.current && !reducedMotion) {
+      Animated.sequence([
+        Animated.timing(scale, {
+          toValue: SELECT_PULSE_SCALE,
+          duration: durations.fast,
+          easing: easings.decelerate,
+          useNativeDriver: true,
+        }),
+        Animated.timing(scale, {
+          toValue: 1,
+          duration: durations.fast,
+          easing: easings.standard,
+          useNativeDriver: true,
+        }),
+      ]).start()
+    }
+    wasSelected.current = isSelected
+  }, [isSelected, reducedMotion, scale])
+
+  return (
+    <Animated.View style={{ transform: [{ scale }] }}>
+      <Pressable
+        onPress={onPress}
+        disabled={isDisabled}
+        accessibilityRole="button"
+        accessibilityState={{ selected: isSelected, disabled: isDisabled }}
+        accessibilityLabel={`${weekday} ${day}${isToday ? ', today' : ''}${isDisabled ? ', unavailable' : ''}`}
+        style={[
+          styles.cell,
+          isSelected && styles.cellSelected,
+          isToday && !isSelected && styles.cellToday,
+          isDisabled && !isSelected && styles.cellDisabled,
+        ]}
+      >
+        <Text variant="caption" color={isSelected ? 'onPrimary' : isDisabled ? 'disabled' : 'secondary'}>
+          {weekday}
+        </Text>
+        <Text variant="bodyEmphasized" color={isSelected ? 'onPrimary' : isDisabled ? 'disabled' : 'primary'}>
+          {day}
+        </Text>
+        {isToday && !isSelected && <View style={styles.todayDot} />}
+      </Pressable>
+    </Animated.View>
+  )
+}
+
 /**
  * A compact, horizontally-scrolling strip of days for picking a booking
  * date. Deliberately not a full month calendar: the backend only answers
@@ -43,8 +115,9 @@ function describe(date: DateStripDate) {
  * of guessed states would mean inventing availability. States shown here
  * are only ones this component can back with real information — today
  * (from the device clock), past (unselectable, same reasoning), selected
- * (the one place the primary accent fills a surface), and unavailable
- * (only for dates the caller explicitly passes in `unavailableDates`).
+ * (the one place the primary accent fills a surface, with a brief
+ * selection pulse), and unavailable (only for dates the caller explicitly
+ * passes in `unavailableDates`).
  */
 export function DateStrip({ dates, selectedDate, onSelectDate, unavailableDates = [] }: DateStripProps) {
   const today = todayISO()
@@ -60,38 +133,21 @@ export function DateStrip({ dates, selectedDate, onSelectDate, unavailableDates 
         const isDisabled = isPast || unavailable.has(date)
 
         return (
-          <Pressable
+          <DateCell
             key={date}
+            date={date}
+            weekday={weekday}
+            day={day}
+            isToday={isToday}
+            isSelected={isSelected}
+            isDisabled={isDisabled}
             onPress={() => onSelectDate(date)}
-            disabled={isDisabled}
-            accessibilityRole="button"
-            accessibilityState={{ selected: isSelected, disabled: isDisabled }}
-            accessibilityLabel={`${weekday} ${day}${isToday ? ', today' : ''}${isDisabled ? ', unavailable' : ''}`}
-            style={[
-              styles.cell,
-              isSelected && styles.cellSelected,
-              isToday && !isSelected && styles.cellToday,
-              isDisabled && !isSelected && styles.cellDisabled,
-            ]}
-          >
-            <Text
-              variant="caption"
-              color={isSelected ? 'onPrimary' : isDisabled ? 'disabled' : 'secondary'}
-            >
-              {weekday}
-            </Text>
-            <Text variant="bodyEmphasized" color={isSelected ? 'onPrimary' : isDisabled ? 'disabled' : 'primary'}>
-              {day}
-            </Text>
-            {isToday && !isSelected && <View style={styles.todayDot} />}
-          </Pressable>
+          />
         )
       })}
     </ScrollView>
   )
 }
-
-const CELL_WIDTH = 52
 
 const styles = StyleSheet.create({
   row: { gap: spacing.sm },
