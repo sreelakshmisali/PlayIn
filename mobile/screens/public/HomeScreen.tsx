@@ -195,7 +195,7 @@ const styles = StyleSheet.create({
   hero: { marginBottom: spacing.xl },
   eyebrowRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   eyebrow: { color: theme.primaryText },
-  title: { color: theme.textPrimary, marginTop: spacing.md },
+  title: { marginTop: spacing.md },
   subtitle: { marginTop: spacing.sm },
   cta: { marginTop: spacing.xl, alignSelf: 'stretch' },
 

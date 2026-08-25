@@ -22,11 +22,11 @@ type State =
 // Reusable rows
 // ---------------------------------------------------------------------------
 
-function InfoRow({ label, value }: { label: string; value: string }) {
+function InfoRow({ label, value, valueColor = 'primary' }: { label: string; value: string; valueColor?: 'primary' | 'success' | 'danger' }) {
   return (
     <View style={styles.infoRow}>
       <Text variant="caption" color="secondary">{label}</Text>
-      <Text variant="bodyEmphasized" color="primary">{value}</Text>
+      <Text variant="bodyEmphasized" color={valueColor}>{value}</Text>
     </View>
   )
 }
@@ -161,7 +161,7 @@ export function PlayerProfileScreen({ navigation }: Props) {
         </Text>
         {profile.location ? (
           <View style={styles.locationRow}>
-            <Ionicons name="location-outline" size={14} color={theme.textMuted} />
+            <Ionicons name="location-outline" size={iconSizes.sm} color={theme.textMuted} />
             <Text variant="caption" color="secondary">{profile.location}</Text>
           </View>
         ) : null}
@@ -175,7 +175,7 @@ export function PlayerProfileScreen({ navigation }: Props) {
       {/* ── Sports ────────────────────────────────────────────── */}
       {profile.sports.length > 0 && (
         <View style={styles.section}>
-          <Text variant="label" color="secondary" style={styles.sectionLabel}>Sports</Text>
+          <Text variant="label" color="primary" style={styles.sectionLabel}>Sports</Text>
           <View style={styles.pillRow}>
             {profile.sports.map((ps) => (
               <View key={ps.sport.id} style={styles.pill}>
@@ -193,12 +193,16 @@ export function PlayerProfileScreen({ navigation }: Props) {
 
       {/* ── Account info ──────────────────────────────────────── */}
       <View style={styles.section}>
-        <Text variant="label" color="secondary" style={styles.sectionLabel}>Account</Text>
+        <Text variant="label" color="primary" style={styles.sectionLabel}>Account</Text>
         {user && (
           <>
             <InfoRow label="Email" value={user.email} />
             <InfoRow label="Role" value={user.role === 'PLAYER' ? 'Player' : user.role === 'OWNER' ? 'Owner' : user.role} />
-            <InfoRow label="Status" value={user.is_active ? 'Active' : 'Deactivated'} />
+            <InfoRow
+              label="Status"
+              value={user.is_active ? 'Active' : 'Deactivated'}
+              valueColor={user.is_active ? 'success' : 'danger'}
+            />
             <InfoRow label="Member since" value={new Date(user.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })} />
           </>
         )}
@@ -255,7 +259,7 @@ const styles = StyleSheet.create({
   locationRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: spacing.xs,
     marginTop: spacing.xs,
   },
   bio: {
@@ -270,8 +274,6 @@ const styles = StyleSheet.create({
   },
   sectionLabel: {
     marginBottom: spacing.sm,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
   },
 
   // Sports pills

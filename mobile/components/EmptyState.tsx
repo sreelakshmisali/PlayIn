@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { StyleSheet, View } from 'react-native'
 
-import { spacing, theme } from '../theme'
+import { spacing } from '../theme'
 import { Button } from './Button'
 import { Text } from './Text'
 

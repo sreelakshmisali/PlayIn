@@ -95,6 +95,6 @@ export const cardPresets = {
   pill: {
     borderRadius: radius.pill,
     paddingHorizontal: spacing.sm,
-    paddingVertical: 4,
+    paddingVertical: spacing.xs,
   } satisfies ViewStyle,
 } as const

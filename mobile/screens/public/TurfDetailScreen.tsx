@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { useCallback, useEffect, useState } from 'react'
 import { Image, ScrollView, StyleSheet, View } from 'react-native'
 
-import { Button, Divider, EmptyState, ErrorBanner, IconContainer, LoadingView, Screen, Surface, Text } from '../../components'
+import { Button, Divider, EmptyState, ErrorBanner, IconContainer, LoadingView, Screen, StatusDot, Surface, Text } from '../../components'
 import { fetchPublicTurf } from '../../services/owners'
 import { ApiError } from '../../services/api'
 import { cardPresets, iconSizes, radius, spacing, theme } from '../../theme'
@@ -214,9 +214,7 @@ export function TurfDetailScreen({ route }: Props) {
 
           <View style={styles.hoursBlock}>
             <View style={styles.hoursRow}>
-              {openStatus !== null && (
-                <View style={[styles.statusDot, { backgroundColor: openStatus ? theme.success : theme.textMuted }]} />
-              )}
+              <StatusDot active={openStatus} />
               <Text variant="caption" color={openStatus ? 'success' : 'secondary'}>
                 {openStatus === null ? 'Hours' : openStatus ? 'Open now' : 'Closed now'}
               </Text>
@@ -242,7 +240,7 @@ const styles = StyleSheet.create({
   heroPlaceholder: { backgroundColor: theme.primarySurface, alignItems: 'center', justifyContent: 'center' },
   gallery: { gap: spacing.sm, marginTop: spacing.sm },
   thumbnail: { width: THUMBNAIL_SIZE, height: THUMBNAIL_SIZE, borderRadius: radius.sm },
-  name: { color: theme.textPrimary, marginTop: spacing.lg },
+  name: { marginTop: spacing.lg },
   locationRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, marginTop: spacing.xs },
   locationText: { flexShrink: 1 },
   listedBy: { marginTop: spacing.xs / 2 },
@@ -255,7 +253,6 @@ const styles = StyleSheet.create({
   summaryRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', gap: spacing.md },
   hoursBlock: { alignItems: 'flex-end', gap: spacing.xs / 2 },
   hoursRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
-  statusDot: { width: 6, height: 6, borderRadius: 3 },
   cta: { marginTop: spacing.lg },
   ctaNote: { textAlign: 'center', marginTop: spacing.sm },
 })

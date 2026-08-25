@@ -52,6 +52,10 @@ export const theme = {
   surfaceMuted: colors.neutral100,
   border: colors.neutral200,
   overlay: 'rgba(23, 23, 23, 0.45)', // neutral900 scrim, for sheets/modal backdrops
+  // A light fill for a small badge sitting on top of a primary-filled
+  // surface (e.g. an active tab's count badge) — white tinted onto the
+  // accent rather than a second, unrelated color.
+  overlayOnPrimary: 'rgba(255, 255, 255, 0.25)',
 
   textPrimary: colors.neutral900,
   textSecondary: colors.neutral600,
