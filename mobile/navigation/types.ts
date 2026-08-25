@@ -8,7 +8,6 @@ export type PlayerTabParamList = {
   Turfs: undefined
   Bookings: undefined
   Profile: undefined
-  Account: undefined
 }
 
 export type PlayerStackParamList = {
