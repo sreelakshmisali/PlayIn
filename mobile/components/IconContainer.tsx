@@ -4,15 +4,16 @@ import { StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native'
 import { iconSizes, theme } from '../theme'
 
 type Size = keyof typeof iconSizes
-type Tone = 'default' | 'primary' | 'muted'
+type Tone = 'default' | 'primary' | 'danger' | 'muted'
 
 /** Container edge per size step — comfortably larger than the icon glyph
  * itself (from `iconSizes`) so the tinted badge has breathing room. */
-const boxSize: Record<Size, number> = { sm: 28, md: 36, lg: 44, xl: 56 }
+const boxSize: Record<Size, number> = { xs: 20, sm: 28, md: 36, lg: 44, xl: 56 }
 
 const toneStyle: Record<Tone, ViewStyle> = {
   default: { backgroundColor: theme.surfaceMuted },
   primary: { backgroundColor: theme.primarySurface },
+  danger: { backgroundColor: theme.dangerSurface },
   muted: { backgroundColor: 'transparent' },
 }
 

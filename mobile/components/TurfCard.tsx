@@ -3,7 +3,9 @@ import { Image, StyleSheet, View } from 'react-native'
 
 import { cardPresets, iconSizes, radius, spacing, theme } from '../theme'
 import type { Turf } from '../types/owners'
+import { Divider } from './Divider'
 import { StatusBadge } from './StatusBadge'
+import { StatusDot } from './StatusDot'
 import { Surface } from './Surface'
 import { Text } from './Text'
 
@@ -106,6 +108,8 @@ export function TurfCard({ turf, onPress, showStatus }: TurfCardProps) {
         </View>
       </View>
 
+      <Divider spacing="md" />
+
       <View style={styles.metaRow}>
         {turf.slot_price !== undefined ? (
           <Text variant="priceEmphasis" color="primary">{`₹${turf.slot_price}`}</Text>
@@ -116,9 +120,7 @@ export function TurfCard({ turf, onPress, showStatus }: TurfCardProps) {
         )}
 
         <View style={styles.hoursRow}>
-          {openStatus !== null && (
-            <View style={[styles.statusDot, { backgroundColor: openStatus ? theme.success : theme.textMuted }]} />
-          )}
+          <StatusDot active={openStatus} />
           <Ionicons name="time-outline" size={iconSizes.sm} color={theme.textMuted} />
           <Text variant="metadata" color="muted">{`${turf.opening_time} – ${turf.closing_time}`}</Text>
           <Ionicons name="chevron-forward" size={iconSizes.sm} color={theme.textMuted} />
@@ -134,7 +136,7 @@ const styles = StyleSheet.create({
   thumbnailPlaceholder: { backgroundColor: theme.primarySurface, alignItems: 'center', justifyContent: 'center' },
   info: { flex: 1, justifyContent: 'center' },
   nameRow: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: spacing.sm },
-  name: { color: theme.textPrimary, flexShrink: 1 },
+  name: { flexShrink: 1 },
   locationRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, marginTop: spacing.xs / 2 },
   locationText: { flexShrink: 1 },
   sports: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs, marginTop: spacing.xs },
@@ -143,11 +145,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginTop: spacing.md,
-    paddingTop: spacing.md,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: theme.border,
   },
   hoursRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
-  statusDot: { width: 6, height: 6, borderRadius: 3 },
 })

@@ -1,6 +1,6 @@
 import { StyleSheet, Text, View } from 'react-native'
 
-import { colors, radius, spacing, typography } from '../theme'
+import { colors, fontWeights, radius, spacing, typography } from '../theme'
 import type { TurfStatus } from '../types/owners'
 
 const STYLES: Record<TurfStatus, { bg: string; fg: string }> = {
@@ -31,5 +31,5 @@ export function StatusBadge({ status }: { status: TurfStatus }) {
 
 const styles = StyleSheet.create({
   badge: { borderRadius: radius.pill, paddingHorizontal: spacing.md, paddingVertical: spacing.xs },
-  label: { ...typography.caption, fontWeight: '600' },
+  label: { ...typography.caption, fontWeight: fontWeights.semibold },
 })

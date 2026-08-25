@@ -3,6 +3,7 @@ import { StyleSheet, View } from 'react-native'
 
 import { iconSizes, radius, spacing, theme } from '../theme'
 import { Button } from './Button'
+import { IconContainer } from './IconContainer'
 import { Text } from './Text'
 
 /** Which failure this is, purely for icon/headline — the caller decides
@@ -47,9 +48,9 @@ export function ErrorBanner({ message, onRetry, retryLabel = 'Try again', kind =
     const config = KIND_CONFIG[kind]
     return (
       <View style={styles.fullContainer} accessibilityRole="alert">
-        <View style={styles.iconCircle}>
+        <IconContainer tone="danger" size="xl" style={styles.iconCircle}>
           <Ionicons name={config.icon} size={iconSizes.lg} color={theme.danger} />
-        </View>
+        </IconContainer>
         <Text variant="sectionTitle" color="primary" style={styles.title}>
           {config.title}
         </Text>
@@ -66,7 +67,7 @@ export function ErrorBanner({ message, onRetry, retryLabel = 'Try again', kind =
   return (
     <View style={styles.bannerContainer} accessibilityRole="alert">
       <Ionicons name="alert-circle-outline" size={iconSizes.sm} color={theme.danger} />
-      <Text variant="body" style={styles.bannerText}>
+      <Text variant="body" color="danger" style={styles.bannerText}>
         {message}
       </Text>
     </View>
@@ -86,7 +87,6 @@ const styles = StyleSheet.create({
   },
   bannerText: {
     flex: 1,
-    color: theme.dangerText,
   },
 
   // Full error state (with retry)
@@ -96,12 +96,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   iconCircle: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: theme.dangerSurface,
-    alignItems: 'center',
-    justifyContent: 'center',
     marginBottom: spacing.lg,
   },
   title: {

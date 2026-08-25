@@ -6,7 +6,7 @@ import { Divider, EmptyState, IconContainer, LoadingView, Screen, Surface, Text 
 import { ErrorBanner } from '../../components/ErrorBanner'
 import { fetchMyBookings } from '../../services/bookings'
 import { ApiError } from '../../services/api'
-import { cardPresets, iconSizes, radius, spacing, theme, typography } from '../../theme'
+import { cardPresets, fontWeights, iconSizes, radius, spacing, theme, typography } from '../../theme'
 import type { Booking, BookingStatus } from '../../types/bookings'
 
 // ---------------------------------------------------------------------------
@@ -49,8 +49,8 @@ function StatusPill({ status }: { status: BookingStatus }) {
   const config = STATUS_CONFIG[status]
   return (
     <View style={[styles.statusPill, { backgroundColor: config.bg }]}>
-      <Ionicons name={config.icon} size={12} color={config.fg} />
-      <Text variant="metadata" style={{ color: config.fg, fontWeight: '600' }}>
+      <Ionicons name={config.icon} size={iconSizes.xs} color={config.fg} />
+      <Text variant="metadata" style={{ color: config.fg, fontWeight: fontWeights.semibold }}>
         {config.label}
       </Text>
     </View>
@@ -109,11 +109,11 @@ function BookingCard({ booking }: { booking: Booking }) {
       {/* Date, time, price row */}
       <View style={styles.detailsRow}>
         <View style={styles.detailItem}>
-          <Ionicons name="calendar-outline" size={14} color={theme.textMuted} />
+          <Ionicons name="calendar-outline" size={iconSizes.sm} color={theme.textMuted} />
           <Text variant="caption" color="primary">{formatDate(booking.date)}</Text>
         </View>
         <View style={styles.detailItem}>
-          <Ionicons name="time-outline" size={14} color={theme.textMuted} />
+          <Ionicons name="time-outline" size={iconSizes.sm} color={theme.textMuted} />
           <Text variant="caption" color="primary">{formatTimeRange(booking.start_time, booking.end_time)}</Text>
         </View>
         <Text variant="bodyEmphasized" color="primary" style={styles.price}>
@@ -136,7 +136,7 @@ function BookingCard({ booking }: { booking: Booking }) {
             <Text variant="caption" color="primary" style={styles.actionText}>
               View details
             </Text>
-            <Ionicons name="chevron-forward" size={14} color={theme.primary} />
+            <Ionicons name="chevron-forward" size={iconSizes.sm} color={theme.primary} />
           </Pressable>
         </>
       )}
@@ -313,14 +313,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     borderRadius: radius.pill,
-    backgroundColor: theme.surfaceMuted,
+    borderWidth: 1,
+    borderColor: theme.border,
+    backgroundColor: theme.surface,
   },
   tabActive: {
     backgroundColor: theme.primary,
+    borderColor: theme.primary,
   },
   tabLabel: {
     ...typography.caption,
-    fontWeight: '500',
+    fontWeight: fontWeights.medium,
     color: theme.textSecondary,
   },
   tabLabelActive: {
@@ -333,14 +336,14 @@ const styles = StyleSheet.create({
     backgroundColor: theme.border,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 4,
+    paddingHorizontal: spacing.xs,
   },
   countBadgeActive: {
-    backgroundColor: 'rgba(255, 255, 255, 0.25)',
+    backgroundColor: theme.overlayOnPrimary,
   },
   countText: {
     ...typography.metadata,
-    fontWeight: '600',
+    fontWeight: fontWeights.semibold,
     color: theme.textSecondary,
   },
   countTextActive: {
@@ -389,7 +392,7 @@ const styles = StyleSheet.create({
   detailItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: spacing.xs,
   },
   price: {
     marginLeft: 'auto',
@@ -399,10 +402,10 @@ const styles = StyleSheet.create({
   statusPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: spacing.xs,
     borderRadius: radius.pill,
     paddingHorizontal: spacing.sm,
-    paddingVertical: 3,
+    paddingVertical: spacing.xs,
   },
 
   // Action row
@@ -414,6 +417,6 @@ const styles = StyleSheet.create({
   },
   actionText: {
     color: theme.primary,
-    fontWeight: '500',
+    fontWeight: fontWeights.medium,
   },
 })

@@ -81,9 +81,7 @@ export function TurfListScreen({ navigation }: Props) {
         contentContainerStyle={styles.list}
         ListHeaderComponent={
           <>
-            <Text variant="screenTitle" style={styles.title}>
-              Turfs
-            </Text>
+            <Text variant="screenTitle">Turfs</Text>
             <ErrorBanner
               message={state.message}
               onRetry={() => void load()}
@@ -103,9 +101,7 @@ export function TurfListScreen({ navigation }: Props) {
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => void load(true)} />}
       ListHeaderComponent={
         <View style={styles.header}>
-          <Text variant="screenTitle" style={styles.title}>
-            Turfs
-          </Text>
+          <Text variant="screenTitle">Turfs</Text>
 
           {sportOptions.length > 0 && (
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipRow}>
@@ -179,7 +175,6 @@ function FilterChip({ label, active, onPress }: { label: string; active: boolean
 const styles = StyleSheet.create({
   list: { padding: spacing.lg, flexGrow: 1 },
   header: { marginBottom: spacing.lg },
-  title: { color: theme.textPrimary },
   chipRow: { gap: spacing.sm, marginTop: spacing.lg },
   chip: {
     borderRadius: radius.pill,
