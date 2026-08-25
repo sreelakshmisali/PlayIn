@@ -112,7 +112,7 @@ export function TurfCard({ turf, onPress, showStatus }: TurfCardProps) {
 
       <View style={styles.metaRow}>
         {turf.slot_price !== undefined ? (
-          <Text variant="priceEmphasis" color="primary">{`₹${turf.slot_price}`}</Text>
+          <Text variant="priceEmphasis" color="primary" numberOfLines={1}>{`₹${turf.slot_price}`}</Text>
         ) : (
           <Text variant="caption" color="muted">
             Price on request
@@ -122,7 +122,7 @@ export function TurfCard({ turf, onPress, showStatus }: TurfCardProps) {
         <View style={styles.hoursRow}>
           <StatusDot active={openStatus} />
           <Ionicons name="time-outline" size={iconSizes.sm} color={theme.textMuted} />
-          <Text variant="metadata" color="muted">{`${turf.opening_time} – ${turf.closing_time}`}</Text>
+          <Text variant="metadata" color="muted" numberOfLines={1} style={styles.hoursText}>{`${turf.opening_time} – ${turf.closing_time}`}</Text>
           <Ionicons name="chevron-forward" size={iconSizes.sm} color={theme.textMuted} />
         </View>
       </View>
@@ -146,5 +146,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  hoursRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
+  // flexShrink so a long "HH:MM – HH:MM" range gives way to the price
+  // (the more important figure) instead of pushing the row wider than
+  // the card on a narrow screen.
+  hoursRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, flexShrink: 1, marginLeft: spacing.sm },
+  hoursText: { flexShrink: 1 },
 })

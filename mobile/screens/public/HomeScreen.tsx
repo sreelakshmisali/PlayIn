@@ -17,7 +17,7 @@ import {
 import { useAuth } from '../../hooks'
 import { fetchPublicTurfs } from '../../services/owners'
 import { ApiError } from '../../services/api'
-import { iconSizes, radius, spacing, theme } from '../../theme'
+import { iconSizes, minTouchTarget, radius, spacing, theme } from '../../theme'
 import type { Turf } from '../../types/owners'
 
 // HomeScreen is mounted inside both PlayerTabParamList and OwnerTabParamList,
@@ -129,7 +129,11 @@ export function HomeScreen({ navigation }: Props) {
             Available turfs
           </Text>
           {state.kind === 'ready' && state.turfs.length > 0 && (
-            <Pressable onPress={goToTurfs} accessibilityRole="button">
+            <Pressable
+              onPress={goToTurfs}
+              accessibilityRole="button"
+              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+            >
               <Text variant="bodyEmphasized" color="primary">
                 See all
               </Text>
@@ -205,6 +209,8 @@ const styles = StyleSheet.create({
 
   chipRow: { gap: spacing.sm, paddingRight: spacing.lg },
   chip: {
+    minHeight: minTouchTarget,
+    justifyContent: 'center',
     borderRadius: radius.pill,
     borderWidth: 1,
     borderColor: theme.border,

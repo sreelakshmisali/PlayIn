@@ -2,11 +2,12 @@ import { Ionicons } from '@expo/vector-icons'
 import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { FlatList, Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 import { EmptyState, ErrorBanner, IconContainer, LoadingView, Text, TurfCard } from '../../components'
 import { fetchPublicTurfs } from '../../services/owners'
 import { ApiError } from '../../services/api'
-import { iconSizes, radius, spacing, theme } from '../../theme'
+import { iconSizes, minTouchTarget, radius, spacing, theme } from '../../theme'
 import type { SportRef, Turf } from '../../types/owners'
 
 // See HomeScreen for why this is typed loosely: the screen is mounted inside
@@ -75,85 +76,97 @@ export function TurfListScreen({ navigation }: Props) {
 
   if (state.kind === 'failed') {
     return (
-      <FlatList
-        data={[]}
-        renderItem={null}
-        contentContainerStyle={styles.list}
-        ListHeaderComponent={
-          <>
-            <Text variant="screenTitle">Turfs</Text>
-            <ErrorBanner
-              message={state.message}
-              onRetry={() => void load()}
-              kind={state.isNetworkError ? 'network' : 'generic'}
-            />
-          </>
-        }
-      />
+      <SafeAreaView style={styles.safeArea} edges={['top', 'bottom', 'left', 'right']}>
+        <FlatList
+          data={[]}
+          renderItem={null}
+          contentContainerStyle={styles.list}
+          ListHeaderComponent={
+            <>
+              <Text variant="screenTitle">Turfs</Text>
+              <ErrorBanner
+                message={state.message}
+                onRetry={() => void load()}
+                kind={state.isNetworkError ? 'network' : 'generic'}
+              />
+            </>
+          }
+        />
+      </SafeAreaView>
     )
   }
 
   return (
-    <FlatList
-      data={visibleTurfs}
-      keyExtractor={(turf) => turf.id}
-      contentContainerStyle={styles.list}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => void load(true)} />}
-      ListHeaderComponent={
-        <View style={styles.header}>
-          <Text variant="screenTitle">Turfs</Text>
+    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom', 'left', 'right']}>
+      <FlatList
+        data={visibleTurfs}
+        keyExtractor={(turf) => turf.id}
+        contentContainerStyle={styles.list}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={() => void load(true)}
+            tintColor={theme.primary}
+            colors={[theme.primary]}
+          />
+        }
+        ListHeaderComponent={
+          <View style={styles.header}>
+            <Text variant="screenTitle">Turfs</Text>
 
-          {sportOptions.length > 0 && (
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipRow}>
-              <FilterChip label="All" active={sportFilter === null} onPress={() => setSportFilter(null)} />
-              {sportOptions.map((sport) => (
-                <FilterChip
-                  key={sport.id}
-                  label={sport.name}
-                  active={sportFilter === sport.id}
-                  onPress={() => setSportFilter(sport.id)}
-                />
-              ))}
-            </ScrollView>
-          )}
+            {sportOptions.length > 0 && (
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipRow}>
+                <FilterChip label="All" active={sportFilter === null} onPress={() => setSportFilter(null)} />
+                {sportOptions.map((sport) => (
+                  <FilterChip
+                    key={sport.id}
+                    label={sport.name}
+                    active={sportFilter === sport.id}
+                    onPress={() => setSportFilter(sport.id)}
+                  />
+                ))}
+              </ScrollView>
+            )}
 
-          {allTurfs.length > 0 && (
-            <View style={styles.sortRow}>
-              <Text variant="caption" color="muted">
-                {visibleTurfs.length} {visibleTurfs.length === 1 ? 'turf' : 'turfs'}
-              </Text>
-              <Pressable
-                onPress={() => setSortKey((key) => (key === 'name' ? 'price' : 'name'))}
-                accessibilityRole="button"
-                style={styles.sortButton}
-              >
-                <Ionicons name="swap-vertical-outline" size={iconSizes.sm} color={theme.textSecondary} />
-                <Text variant="caption" color="secondary">{`Sort: ${SORT_LABEL[sortKey]}`}</Text>
-              </Pressable>
-            </View>
-          )}
-        </View>
-      }
-      ItemSeparatorComponent={() => <View style={styles.separator} />}
-      ListEmptyComponent={
-        <EmptyState
-          icon={
-            <IconContainer tone="muted" size="lg">
-              <Ionicons name="location-outline" size={iconSizes.lg} color={theme.textMuted} />
-            </IconContainer>
-          }
-          title={allTurfs.length === 0 ? 'No turfs yet' : 'No results'}
-          message={
-            allTurfs.length === 0
-              ? 'No turfs are listed yet. Check back soon.'
-              : 'No turfs match this sport. Try a different filter.'
-          }
-        />
-      }
-      renderItem={({ item }) => (
-        <TurfCard turf={item} onPress={() => navigation.navigate('TurfDetail', { turfId: item.id })} />
-      )}
-    />
+            {allTurfs.length > 0 && (
+              <View style={styles.sortRow}>
+                <Text variant="caption" color="muted">
+                  {visibleTurfs.length} {visibleTurfs.length === 1 ? 'turf' : 'turfs'}
+                </Text>
+                <Pressable
+                  onPress={() => setSortKey((key) => (key === 'name' ? 'price' : 'name'))}
+                  accessibilityRole="button"
+                  hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+                  style={styles.sortButton}
+                >
+                  <Ionicons name="swap-vertical-outline" size={iconSizes.sm} color={theme.textSecondary} />
+                  <Text variant="caption" color="secondary">{`Sort: ${SORT_LABEL[sortKey]}`}</Text>
+                </Pressable>
+              </View>
+            )}
+          </View>
+        }
+        ItemSeparatorComponent={() => <View style={styles.separator} />}
+        ListEmptyComponent={
+          <EmptyState
+            icon={
+              <IconContainer tone="muted" size="lg">
+                <Ionicons name="location-outline" size={iconSizes.lg} color={theme.textMuted} />
+              </IconContainer>
+            }
+            title={allTurfs.length === 0 ? 'No turfs yet' : 'No results'}
+            message={
+              allTurfs.length === 0
+                ? 'No turfs are listed yet. Check back soon.'
+                : 'No turfs match this sport. Try a different filter.'
+            }
+          />
+        }
+        renderItem={({ item }) => (
+          <TurfCard turf={item} onPress={() => navigation.navigate('TurfDetail', { turfId: item.id })} />
+        )}
+      />
+    </SafeAreaView>
   )
 }
 
@@ -173,16 +186,20 @@ function FilterChip({ label, active, onPress }: { label: string; active: boolean
 }
 
 const styles = StyleSheet.create({
+  safeArea: { flex: 1, backgroundColor: theme.background },
   list: { padding: spacing.lg, flexGrow: 1 },
   header: { marginBottom: spacing.lg },
   chipRow: { gap: spacing.sm, marginTop: spacing.lg },
   chip: {
+    minHeight: minTouchTarget,
     borderRadius: radius.pill,
     borderWidth: 1,
     borderColor: theme.border,
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.sm,
     backgroundColor: theme.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   chipActive: { backgroundColor: theme.primary, borderColor: theme.primary },
   sortRow: {

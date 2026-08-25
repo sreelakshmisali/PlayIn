@@ -26,7 +26,7 @@ function InfoRow({ label, value, valueColor = 'primary' }: { label: string; valu
   return (
     <View style={styles.infoRow}>
       <Text variant="caption" color="secondary">{label}</Text>
-      <Text variant="bodyEmphasized" color={valueColor}>{value}</Text>
+      <Text variant="bodyEmphasized" color={valueColor} numberOfLines={1} style={styles.infoValue}>{value}</Text>
     </View>
   )
 }
@@ -292,7 +292,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    gap: spacing.md,
     paddingVertical: spacing.sm,
+  },
+  // A long email address gets an ellipsis instead of overflowing past
+  // the card edge or squeezing the "Email"/"Role"/etc. label.
+  infoValue: {
+    flexShrink: 1,
+    textAlign: 'right',
   },
 
   // Menu rows

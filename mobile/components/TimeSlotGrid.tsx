@@ -3,7 +3,7 @@ import { useEffect, useRef } from 'react'
 import { Animated, Pressable, StyleSheet, View } from 'react-native'
 
 import { useReducedMotion } from '../hooks'
-import { durations, easings, iconSizes, radius, spacing, theme } from '../theme'
+import { durations, easings, iconSizes, minTouchTarget, radius, spacing, theme } from '../theme'
 import { EmptyState } from './EmptyState'
 import { IconContainer } from './IconContainer'
 import { Text } from './Text'
@@ -152,6 +152,7 @@ const styles = StyleSheet.create({
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
   cell: {
     minWidth: 76,
+    minHeight: minTouchTarget,
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
     borderRadius: radius.md,
