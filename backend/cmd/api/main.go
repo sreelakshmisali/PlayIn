@@ -16,6 +16,7 @@ import (
 
 	"github.com/orgmelethil/playhub/backend/internal/admin"
 	"github.com/orgmelethil/playhub/backend/internal/auth"
+	"github.com/orgmelethil/playhub/backend/internal/bookings"
 	"github.com/orgmelethil/playhub/backend/internal/config"
 	"github.com/orgmelethil/playhub/backend/internal/database"
 	"github.com/orgmelethil/playhub/backend/internal/health"
@@ -88,14 +89,21 @@ func run() error {
 
 	adminHandler := admin.NewHandler(ownersService, authService, authService, logger)
 
+	bookingsHandler := bookings.NewHandler(
+		bookings.NewService(bookings.NewRepository(pool)),
+		authService,
+		logger,
+	)
+
 	router := server.NewRouter(server.Dependencies{
-		Config:  cfg,
-		Logger:  logger,
-		Health:  healthHandler,
-		Auth:    authHandler,
-		Players: playersHandler,
-		Owners:  ownersHandler,
-		Admin:   adminHandler,
+		Config:   cfg,
+		Logger:   logger,
+		Health:   healthHandler,
+		Auth:     authHandler,
+		Players:  playersHandler,
+		Owners:   ownersHandler,
+		Admin:    adminHandler,
+		Bookings: bookingsHandler,
 	})
 
 	if err := server.New(cfg.HTTP, router, logger).Run(ctx); err != nil {

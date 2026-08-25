@@ -61,8 +61,9 @@ docker compose --profile tools run --rm migrate force 1
 | `000002_auth` | `users`, `refresh_tokens`, the `set_updated_at()` trigger function. |
 | `000003_player_profiles` | `sports` (seeded), `player_profiles`, `player_sports`. |
 | `000004_owner_turfs` | `owner_profiles`, `turfs`, `amenities` (seeded), `turf_sports`, `turf_amenities`, `turf_images`. |
-
-No other business tables exist yet.
+| `000005_admin_moderation` | Turf moderation columns and admin actions. |
+| `000006_turf_availability` | `turf_slots`, `turf_blocked_dates`, `turf_blocked_time_ranges`, slot settings on `turfs`. |
+| `000007_bookings` | `bookings`; adds `BOOKED` to `turf_slots.status`. |
 
 `000003` and `000004` seed the sports and amenities catalogues. They are
 reference data the API cannot function without, not sample data, so they

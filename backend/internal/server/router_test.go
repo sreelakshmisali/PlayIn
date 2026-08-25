@@ -13,6 +13,7 @@ import (
 
 	"github.com/orgmelethil/playhub/backend/internal/admin"
 	"github.com/orgmelethil/playhub/backend/internal/auth"
+	"github.com/orgmelethil/playhub/backend/internal/bookings"
 	"github.com/orgmelethil/playhub/backend/internal/config"
 	"github.com/orgmelethil/playhub/backend/internal/health"
 	"github.com/orgmelethil/playhub/backend/internal/middleware"
@@ -45,15 +46,17 @@ func testRouter() http.Handler {
 	ownersService := owners.NewService(nil)
 	ownersHandler := owners.NewHandler(ownersService, authService, logger)
 	adminHandler := admin.NewHandler(ownersService, authService, authService, logger)
+	bookingsHandler := bookings.NewHandler(bookings.NewService(nil), authService, logger)
 
 	return NewRouter(Dependencies{
-		Config:  cfg,
-		Logger:  logger,
-		Health:  health.NewHandler(health.NewService(stubPinger{}, "test", "test")),
-		Auth:    authHandler,
-		Players: playersHandler,
-		Owners:  ownersHandler,
-		Admin:   adminHandler,
+		Config:   cfg,
+		Logger:   logger,
+		Health:   health.NewHandler(health.NewService(stubPinger{}, "test", "test")),
+		Auth:     authHandler,
+		Players:  playersHandler,
+		Owners:   ownersHandler,
+		Admin:    adminHandler,
+		Bookings: bookingsHandler,
 	})
 }
 
