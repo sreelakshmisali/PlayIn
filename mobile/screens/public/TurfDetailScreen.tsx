@@ -142,7 +142,7 @@ export function TurfDetailScreen({ route }: Props) {
       </Text>
 
       <View style={styles.locationRow}>
-        <Ionicons name="location-outline" size={iconSizes.sm} color={theme.textMuted} />
+        <Ionicons name="location-outline" size={iconSizes.sm} color={theme.textMuted} style={styles.locationIcon} />
         <Text variant="body" color="secondary" style={styles.locationText}>
           {turf.address}, {turf.city}
         </Text>
@@ -194,7 +194,7 @@ export function TurfDetailScreen({ route }: Props) {
 
       <Surface variant="muted" style={styles.summary}>
         <View style={styles.summaryRow}>
-          <View>
+          <View style={styles.priceBlock}>
             <Text variant="metadata" color="muted">
               Price
             </Text>
@@ -217,13 +217,13 @@ export function TurfDetailScreen({ route }: Props) {
               {openStatus !== null && (
                 <View style={[styles.statusDot, { backgroundColor: openStatus ? theme.success : theme.textMuted }]} />
               )}
-              <Text variant="caption" color={openStatus ? 'success' : 'secondary'}>
+              <Text variant="caption" color={openStatus ? 'success' : 'secondary'} numberOfLines={1}>
                 {openStatus === null ? 'Hours' : openStatus ? 'Open now' : 'Closed now'}
               </Text>
             </View>
-            <Text variant="metadata" color="muted">{`${turf.opening_time} – ${turf.closing_time}`}</Text>
+            <Text variant="metadata" color="muted" numberOfLines={1}>{`${turf.opening_time} – ${turf.closing_time}`}</Text>
             {turf.capacity !== undefined ? (
-              <Text variant="metadata" color="muted">{`${turf.capacity} players`}</Text>
+              <Text variant="metadata" color="muted" numberOfLines={1}>{`${turf.capacity} players`}</Text>
             ) : null}
           </View>
         </View>
@@ -243,7 +243,12 @@ const styles = StyleSheet.create({
   gallery: { gap: spacing.sm, marginTop: spacing.sm },
   thumbnail: { width: THUMBNAIL_SIZE, height: THUMBNAIL_SIZE, borderRadius: radius.sm },
   name: { color: theme.textPrimary, marginTop: spacing.lg },
-  locationRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, marginTop: spacing.xs },
+  // flex-start (not center) plus a small top nudge on the icon: a long
+  // address wraps to two or three lines here, and center-aligning the
+  // icon against the whole wrapped block leaves it drifting away from
+  // the first line instead of marking it.
+  locationRow: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.xs, marginTop: spacing.xs },
+  locationIcon: { marginTop: 2 },
   locationText: { flexShrink: 1 },
   listedBy: { marginTop: spacing.xs / 2 },
   pillRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginTop: spacing.md },
@@ -253,7 +258,10 @@ const styles = StyleSheet.create({
   sectionTitle: { marginBottom: 0 },
   summary: { marginTop: spacing.lg },
   summaryRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', gap: spacing.md },
-  hoursBlock: { alignItems: 'flex-end', gap: spacing.xs / 2 },
+  // Both sides can shrink so a large price or a long hours/capacity line
+  // doesn't push this row wider than the card on a narrow screen.
+  priceBlock: { flexShrink: 1 },
+  hoursBlock: { flexShrink: 1, alignItems: 'flex-end', gap: spacing.xs / 2 },
   hoursRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
   statusDot: { width: 6, height: 6, borderRadius: 3 },
   cta: { marginTop: spacing.lg },

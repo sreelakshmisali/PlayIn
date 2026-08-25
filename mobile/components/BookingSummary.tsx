@@ -60,7 +60,7 @@ function Row({ label, value }: { label: string; value: string }) {
       <Text variant="body" color="secondary">
         {label}
       </Text>
-      <Text variant="bodyEmphasized" color="primary">
+      <Text variant="bodyEmphasized" color="primary" numberOfLines={1} style={styles.rowValue}>
         {value}
       </Text>
     </View>
@@ -156,7 +156,8 @@ export function BookingSummary({ details, onConfirm, pending = false, disabled =
 const styles = StyleSheet.create({
   header: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   headerText: { flex: 1 },
-  row: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: spacing.xs },
+  row: { flexDirection: 'row', justifyContent: 'space-between', gap: spacing.md, paddingVertical: spacing.xs },
+  rowValue: { flexShrink: 1, textAlign: 'right' },
   priceRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   note: { marginTop: spacing.sm },
   cta: { marginTop: spacing.lg },

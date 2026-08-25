@@ -1,12 +1,12 @@
 import { Ionicons } from '@expo/vector-icons'
 import { useCallback, useEffect, useState } from 'react'
-import { FlatList, Pressable, StyleSheet, View } from 'react-native'
+import { Pressable, StyleSheet, View } from 'react-native'
 
 import { Divider, EmptyState, IconContainer, LoadingView, Screen, Surface, Text } from '../../components'
 import { ErrorBanner } from '../../components/ErrorBanner'
 import { fetchMyBookings } from '../../services/bookings'
 import { ApiError } from '../../services/api'
-import { cardPresets, iconSizes, radius, spacing, theme, typography } from '../../theme'
+import { cardPresets, iconSizes, minTouchTarget, radius, spacing, theme, typography } from '../../theme'
 import type { Booking, BookingStatus } from '../../types/bookings'
 
 // ---------------------------------------------------------------------------
@@ -86,13 +86,13 @@ function BookingCard({ booking }: { booking: Booking }) {
           <IconContainer tone="primary" size="sm">
             <Ionicons name="football-outline" size={iconSizes.sm} color={theme.primary} />
           </IconContainer>
-          <Text variant="caption" color="secondary">{booking.sport_name}</Text>
+          <Text variant="caption" color="secondary" numberOfLines={1} style={styles.sportName}>{booking.sport_name}</Text>
         </View>
         <StatusPill status={booking.status} />
       </View>
 
       {/* Turf name */}
-      <Text variant="bodyEmphasized" color="primary" style={styles.turfName}>
+      <Text variant="bodyEmphasized" color="primary" numberOfLines={2} style={styles.turfName}>
         {booking.turf.name}
       </Text>
 
@@ -106,17 +106,18 @@ function BookingCard({ booking }: { booking: Booking }) {
 
       <Divider spacing="md" />
 
-      {/* Date, time, price row */}
+      {/* Date, time, price row — wraps on narrow screens instead of
+          overflowing when the date/time text or price runs long. */}
       <View style={styles.detailsRow}>
         <View style={styles.detailItem}>
           <Ionicons name="calendar-outline" size={14} color={theme.textMuted} />
-          <Text variant="caption" color="primary">{formatDate(booking.date)}</Text>
+          <Text variant="caption" color="primary" numberOfLines={1}>{formatDate(booking.date)}</Text>
         </View>
         <View style={styles.detailItem}>
           <Ionicons name="time-outline" size={14} color={theme.textMuted} />
-          <Text variant="caption" color="primary">{formatTimeRange(booking.start_time, booking.end_time)}</Text>
+          <Text variant="caption" color="primary" numberOfLines={1}>{formatTimeRange(booking.start_time, booking.end_time)}</Text>
         </View>
-        <Text variant="bodyEmphasized" color="primary" style={styles.price}>
+        <Text variant="bodyEmphasized" color="primary" numberOfLines={1} style={styles.price}>
           {`₹${booking.price}`}
         </Text>
       </View>
@@ -282,14 +283,16 @@ export function MyBookingsScreen() {
           />
         </View>
       ) : (
-        <FlatList
-          data={filtered}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => <BookingCard booking={item} />}
-          contentContainerStyle={styles.list}
-          showsVerticalScrollIndicator={false}
-          scrollEnabled={false}
-        />
+        // A plain mapped list, not a nested FlatList: this screen's only
+        // scroll container is the Screen itself, and a non-scrolling
+        // FlatList inside another ScrollView only renders its initial
+        // batch — everything past it stays invisible since nothing ever
+        // drives its own virtualization forward.
+        <View style={styles.list}>
+          {filtered.map((item) => (
+            <BookingCard key={item.id} booking={item} />
+          ))}
+        </View>
       )}
     </Screen>
   )
@@ -309,6 +312,8 @@ const styles = StyleSheet.create({
   tab: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: minTouchTarget,
     gap: spacing.xs,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
@@ -367,7 +372,11 @@ const styles = StyleSheet.create({
   sportRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    flexShrink: 1,
     gap: spacing.xs,
+  },
+  sportName: {
+    flexShrink: 1,
   },
   turfName: {
     marginTop: spacing.sm,
@@ -383,8 +392,10 @@ const styles = StyleSheet.create({
   },
   detailsRow: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     alignItems: 'center',
-    gap: spacing.md,
+    rowGap: spacing.xs,
+    columnGap: spacing.md,
   },
   detailItem: {
     flexDirection: 'row',
@@ -410,6 +421,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    minHeight: minTouchTarget,
     gap: spacing.xs,
   },
   actionText: {
