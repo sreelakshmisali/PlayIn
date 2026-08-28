@@ -15,7 +15,7 @@ interface SplashScreenProps {
 
 /**
  * The app's entry screen, shown while `AuthProvider` resolves the stored
- * session. White background, the "PlayIn" wordmark centered, and two very
+ * session. White background, the "PlayHub" wordmark centered, and two very
  * low-contrast tinted shapes in the corners for a hint of atmosphere —
  * never competing with the wordmark for attention. No logo asset exists
  * yet; the wordmark stands in for it and should be swapped for the real
