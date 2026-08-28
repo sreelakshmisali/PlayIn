@@ -1,4 +1,4 @@
-import type { OwnerProfile, SaveOwnerProfilePayload, SaveTurfPayload, Turf } from '../types/owners'
+import type { OwnerProfile, SaveOwnerProfilePayload, SaveTurfPayload, Slot, Turf } from '../types/owners'
 import { api } from './api'
 
 // --- owner profile -----------------------------------------------------------
@@ -48,4 +48,14 @@ export async function fetchPublicTurfs(): Promise<Turf[]> {
 
 export function fetchPublicTurf(turfId: string): Promise<Turf> {
   return api.get<Turf>(`/turfs/${encodeURIComponent(turfId)}`)
+}
+
+/** Fetches one date's bookable slots for a turf. Public, no session
+ * required — matches `PublicAvailability` on the backend, which only ever
+ * surfaces an APPROVED turf's slots. `date` is `YYYY-MM-DD`. */
+export async function fetchTurfAvailability(turfId: string, date: string): Promise<Slot[]> {
+  const body = await api.get<{ date: string; slots: Slot[] }>(`/turfs/${encodeURIComponent(turfId)}/availability`, {
+    query: { date },
+  })
+  return body.slots
 }

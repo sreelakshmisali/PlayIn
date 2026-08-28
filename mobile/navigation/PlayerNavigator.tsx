@@ -3,6 +3,9 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 
 import {
+  BookingConfirmationScreen,
+  BookingDetailScreen,
+  BookingScreen,
   HomeScreen,
   MyBookingsScreen,
   PlayerProfileEditScreen,
@@ -46,6 +49,13 @@ export function PlayerNavigator() {
       <Stack.Screen name="PlayerTabs" component={PlayerTabs} options={{ headerShown: false }} />
       <Stack.Screen name="TurfDetail" component={TurfDetailScreen} options={{ title: 'Turf' }} />
       <Stack.Screen name="PlayerProfileEdit" component={PlayerProfileEditScreen} options={{ title: 'Edit profile' }} />
+      <Stack.Screen name="Booking" component={BookingScreen} options={{ title: 'Book a slot' }} />
+      <Stack.Screen
+        name="BookingConfirmation"
+        component={BookingConfirmationScreen}
+        options={{ title: 'Confirmed', headerBackVisible: false, gestureEnabled: false }}
+      />
+      <Stack.Screen name="BookingDetail" component={BookingDetailScreen} options={{ title: 'Booking' }} />
     </Stack.Navigator>
   )
 }

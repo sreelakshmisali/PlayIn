@@ -14,6 +14,9 @@ export type PlayerStackParamList = {
   PlayerTabs: undefined
   TurfDetail: { turfId: string }
   PlayerProfileEdit: undefined
+  Booking: { turfId: string }
+  BookingConfirmation: { bookingId: string }
+  BookingDetail: { bookingId: string }
 }
 
 export type OwnerTabParamList = {

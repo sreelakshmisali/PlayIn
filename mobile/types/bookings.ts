@@ -1,35 +1,49 @@
 /**
- * Booking types for the mobile client.
- *
- * These match the shape the Go API will return once the booking endpoints
- * exist (Phase 6 of the slot model). Until then the service layer returns
- * an empty list and every screen that renders bookings handles empty state
- * gracefully.
+ * Booking types for the mobile client, matching the Go API's actual
+ * response shapes (`backend/internal/bookings/model.go`).
  */
 
-/** Where a booking sits in its lifecycle. */
-export type BookingStatus = 'CONFIRMED' | 'COMPLETED' | 'CANCELLED'
+/** Where a booking sits in its lifecycle. The backend's set is closed at
+ * two values — there is no third "completed" status; a CONFIRMED booking
+ * whose date has passed is still, honestly, CONFIRMED. Screens derive
+ * "upcoming vs past" from the date instead of a status the API doesn't
+ * send. */
+export type BookingStatus = 'CONFIRMED' | 'CANCELLED'
 
-/** Enough turf context to render a booking card without a second fetch. */
+/** The slice of a turf a booking response carries, joined in so a booking
+ * card never needs a second fetch. */
 export interface BookingTurf {
   id: string
   name: string
   address: string
   city: string
-  /** First image URL, if available. */
-  image_url?: string
 }
 
-/** A single booking as returned by `GET /players/me/bookings`. */
+/** A single booking, as returned by every `/players/me/bookings*` endpoint. */
 export interface Booking {
   id: string
   turf: BookingTurf
-  sport_name: string
+  turf_slot_id: string
   date: string
   start_time: string
   end_time: string
+  status: BookingStatus
   /** Price at time of booking, not the turf's current price. */
   price: number
-  status: BookingStatus
   created_at: string
+  updated_at: string
+  cancelled_at?: string
+}
+
+/** One page of `GET /players/me/bookings`. */
+export interface BookingPage {
+  bookings: Booking[]
+  total: number
+  limit: number
+  offset: number
+}
+
+/** The body of `POST /players/me/bookings`. */
+export interface CreateBookingPayload {
+  turf_slot_id: string
 }
