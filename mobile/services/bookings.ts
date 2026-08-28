@@ -1,17 +1,25 @@
-import type { Booking } from '../types/bookings'
+import type { Booking, BookingPage } from '../types/bookings'
 import { api } from './api'
 
-/**
- * Fetch the signed-in player's bookings. The endpoint does not exist yet
- * (booking is Phase 6 of the slot model), so this returns an empty list
- * until the backend ships `GET /players/me/bookings`.
- *
- * When the API is ready, remove the early return and uncomment the real
- * call — the response shape (`{ bookings: Booking[] }`) is already typed.
- */
-export async function fetchMyBookings(): Promise<Booking[]> {
-  // TODO: uncomment when GET /players/me/bookings exists
-  // const body = await api.get<{ bookings: Booking[] }>('/players/me/bookings')
-  // return body.bookings
-  return []
+/** Fetches one page of the signed-in player's own bookings, most recent
+ * first — matches `GET /players/me/bookings?limit=&offset=`. Both
+ * parameters are optional; omitting them takes the API's own defaults. */
+export function fetchMyBookings(limit?: number, offset?: number): Promise<BookingPage> {
+  return api.get<BookingPage>('/players/me/bookings', { query: { limit, offset } })
+}
+
+/** Reads one of the signed-in player's own bookings. */
+export function fetchBooking(bookingId: string): Promise<Booking> {
+  return api.get<Booking>(`/players/me/bookings/${encodeURIComponent(bookingId)}`)
+}
+
+/** Reserves one open slot for the signed-in player. */
+export function createBooking(turfSlotId: string): Promise<Booking> {
+  return api.post<Booking>('/players/me/bookings', { body: { turf_slot_id: turfSlotId } })
+}
+
+/** Cancels one of the signed-in player's own CONFIRMED bookings, releasing
+ * its slot back to OPEN. */
+export function cancelBooking(bookingId: string): Promise<Booking> {
+  return api.post<Booking>(`/players/me/bookings/${encodeURIComponent(bookingId)}/cancel`, {})
 }

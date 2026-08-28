@@ -1,6 +1,8 @@
 import { Ionicons } from '@expo/vector-icons'
 import { useCallback, useEffect, useState } from 'react'
 import { Pressable, StyleSheet, View } from 'react-native'
+import { useNavigation } from '@react-navigation/native'
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
 
 import { Divider, EmptyState, IconContainer, LoadingView, Screen, Surface, Text } from '../../components'
 import { ErrorBanner } from '../../components/ErrorBanner'
@@ -8,6 +10,7 @@ import { fetchMyBookings } from '../../services/bookings'
 import { ApiError } from '../../services/api'
 import { cardPresets, fontWeights, iconSizes, minTouchTarget, radius, spacing, theme, typography } from '../../theme'
 import type { Booking, BookingStatus } from '../../types/bookings'
+import type { PlayerStackParamList } from '../../navigation/types'
 
 // ---------------------------------------------------------------------------
 // Tab filter
@@ -30,8 +33,10 @@ function todayISO(): string {
 
 function bucketFor(booking: Booking): Tab {
   if (booking.status === 'CANCELLED') return 'cancelled'
-  if (booking.status === 'COMPLETED') return 'past'
-  // CONFIRMED: upcoming if date >= today, past otherwise
+  // CONFIRMED: upcoming if date >= today, past otherwise. The backend has
+  // no third "completed" status — a CONFIRMED booking whose date has
+  // passed is still, honestly, CONFIRMED; this bucket is where that reads
+  // as "past" without inventing a status the API never sends.
   return booking.date >= todayISO() ? 'upcoming' : 'past'
 }
 
@@ -41,7 +46,6 @@ function bucketFor(booking: Booking): Tab {
 
 const STATUS_CONFIG: Record<BookingStatus, { label: string; bg: string; fg: string; icon: keyof typeof Ionicons.glyphMap }> = {
   CONFIRMED: { label: 'Confirmed', bg: theme.successSurface, fg: theme.successText, icon: 'checkmark-circle-outline' },
-  COMPLETED: { label: 'Completed', bg: theme.surfaceMuted, fg: theme.textSecondary, icon: 'checkmark-done-outline' },
   CANCELLED: { label: 'Cancelled', bg: theme.dangerSurface, fg: theme.dangerText, icon: 'close-circle-outline' },
 }
 
@@ -75,26 +79,21 @@ function formatTimeRange(start: string, end: string): string {
 // Booking card
 // ---------------------------------------------------------------------------
 
-function BookingCard({ booking }: { booking: Booking }) {
-  const config = STATUS_CONFIG[booking.status]
-
+function BookingCard({ booking, onPress }: { booking: Booking; onPress: () => void }) {
   return (
     <Surface variant="card" style={styles.card}>
-      {/* Top row: sport + status */}
+      {/* Top row: turf icon + status */}
       <View style={styles.cardHeader}>
         <View style={styles.sportRow}>
           <IconContainer tone="primary" size="sm">
             <Ionicons name="football-outline" size={iconSizes.sm} color={theme.primary} />
           </IconContainer>
-          <Text variant="caption" color="secondary" numberOfLines={1} style={styles.sportName}>{booking.sport_name}</Text>
+          <Text variant="bodyEmphasized" color="primary" numberOfLines={1} style={styles.turfNameHeader}>
+            {booking.turf.name}
+          </Text>
         </View>
         <StatusPill status={booking.status} />
       </View>
-
-      {/* Turf name */}
-      <Text variant="bodyEmphasized" color="primary" numberOfLines={2} style={styles.turfName}>
-        {booking.turf.name}
-      </Text>
 
       {/* Location */}
       <View style={styles.infoRow}>
@@ -122,25 +121,18 @@ function BookingCard({ booking }: { booking: Booking }) {
         </Text>
       </View>
 
-      {/* Action row for upcoming bookings */}
-      {booking.status === 'CONFIRMED' && booking.date >= todayISO() && (
-        <>
-          <Divider spacing="md" />
-          <Pressable
-            style={styles.actionRow}
-            accessibilityRole="button"
-            accessibilityLabel="View booking details"
-            onPress={() => {
-              // Navigation to booking detail will be wired when the route exists
-            }}
-          >
-            <Text variant="caption" color="primary" style={styles.actionText}>
-              View details
-            </Text>
-            <Ionicons name="chevron-forward" size={iconSizes.sm} color={theme.primary} />
-          </Pressable>
-        </>
-      )}
+      <Divider spacing="md" />
+      <Pressable
+        style={styles.actionRow}
+        accessibilityRole="button"
+        accessibilityLabel="View booking details"
+        onPress={onPress}
+      >
+        <Text variant="caption" color="primary" style={styles.actionText}>
+          View details
+        </Text>
+        <Ionicons name="chevron-forward" size={iconSizes.sm} color={theme.primary} />
+      </Pressable>
     </Surface>
   )
 }
@@ -213,14 +205,20 @@ type State =
   | { kind: 'ready'; bookings: Booking[] }
   | { kind: 'failed'; message: string; isNetworkError: boolean }
 
+// A generous single page rather than paging UI: comfortably covers a
+// player's real booking history without the added complexity of
+// infinite-scroll/"load more" for what is, in practice, a short list.
+const PAGE_SIZE = 100
+
 export function MyBookingsScreen() {
   const [state, setState] = useState<State>({ kind: 'loading' })
   const [activeTab, setActiveTab] = useState<Tab>('upcoming')
+  const navigation = useNavigation<NativeStackNavigationProp<PlayerStackParamList>>()
 
   const load = useCallback(() => {
     setState({ kind: 'loading' })
-    fetchMyBookings()
-      .then((bookings) => setState({ kind: 'ready', bookings }))
+    fetchMyBookings(PAGE_SIZE, 0)
+      .then((page) => setState({ kind: 'ready', bookings: page.bookings }))
       .catch((error: unknown) => {
         setState({
           kind: 'failed',
@@ -290,7 +288,7 @@ export function MyBookingsScreen() {
         // drives its own virtualization forward.
         <View style={styles.list}>
           {filtered.map((item) => (
-            <BookingCard key={item.id} booking={item} />
+            <BookingCard key={item.id} booking={item} onPress={() => navigation.navigate('BookingDetail', { bookingId: item.id })} />
           ))}
         </View>
       )}
@@ -378,11 +376,8 @@ const styles = StyleSheet.create({
     flexShrink: 1,
     gap: spacing.xs,
   },
-  sportName: {
+  turfNameHeader: {
     flexShrink: 1,
-  },
-  turfName: {
-    marginTop: spacing.sm,
   },
   infoRow: {
     flexDirection: 'row',

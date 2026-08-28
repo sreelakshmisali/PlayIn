@@ -1,16 +1,22 @@
 import { Ionicons } from '@expo/vector-icons'
 import { useCallback, useEffect, useState } from 'react'
 import { Image, ScrollView, StyleSheet, View } from 'react-native'
+import { useNavigation } from '@react-navigation/native'
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
 
 import { Button, Divider, EmptyState, ErrorBanner, IconContainer, LoadingView, Screen, StatusDot, Surface, Text } from '../../components'
 import { fetchPublicTurf } from '../../services/owners'
 import { ApiError } from '../../services/api'
+import { useAuth } from '../../hooks'
 import { cardPresets, iconSizes, radius, spacing, theme } from '../../theme'
 import type { Turf } from '../../types/owners'
+import type { PlayerStackParamList } from '../../navigation/types'
 
 // Mounted from both the player and owner stacks under the same route name and
 // param shape ({ turfId }); a shared, minimal prop type avoids pinning this
-// screen to either stack's full param list.
+// screen to either stack's full param list. Booking (below) is only ever
+// reachable from the player stack, so it's cast at the one call site that
+// needs it rather than widening this shared Props type.
 interface Props {
   route: { params: { turfId: string } }
 }
@@ -51,6 +57,11 @@ function isOpenNow(openingTime: string, closingTime: string): boolean | null {
 export function TurfDetailScreen({ route }: Props) {
   const { turfId } = route.params
   const [state, setState] = useState<State>({ kind: 'loading' })
+  const { user } = useAuth()
+  const isPlayer = user?.role === 'PLAYER'
+  // Only the player stack registers a "Booking" route; this cast is safe
+  // exactly because the CTA below is gated on isPlayer.
+  const navigation = useNavigation<NativeStackNavigationProp<PlayerStackParamList>>()
 
   const load = useCallback(() => {
     let cancelled = false
@@ -226,10 +237,20 @@ export function TurfDetailScreen({ route }: Props) {
           </View>
         </View>
 
-        <Button label="Book this turf" onPress={() => {}} disabled style={styles.cta} />
-        <Text variant="metadata" color="muted" style={styles.ctaNote}>
-          Slot booking is coming soon — check back for live availability.
-        </Text>
+        {isPlayer ? (
+          <Button
+            label="Book this turf"
+            onPress={() => navigation.navigate('Booking', { turfId: turf.id })}
+            style={styles.cta}
+          />
+        ) : (
+          <>
+            <Button label="Book this turf" onPress={() => {}} disabled style={styles.cta} />
+            <Text variant="metadata" color="muted" style={styles.ctaNote}>
+              Booking is available to players.
+            </Text>
+          </>
+        )}
       </Surface>
     </Screen>
   )

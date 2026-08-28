@@ -76,3 +76,23 @@ export interface SaveTurfPayload {
   opening_time: string
   closing_time: string
 }
+
+/** A slot's own management state, set by the owner. `BOOKED` is set by the
+ * booking flow itself (`POST /players/me/bookings`), not by anything in
+ * this package. */
+export type SlotStatus = 'OPEN' | 'BLOCKED' | 'BOOKED'
+
+/** One bookable window on one turf on one date, as returned by
+ * `GET /turfs/{id}/availability?date=`. `available` is derived server-side
+ * from status plus any blocked date/time range — never recomputed here. */
+export interface Slot {
+  id: string
+  date: string
+  start_time: string
+  end_time: string
+  price: number
+  status: SlotStatus
+  available: boolean
+  created_at: string
+  updated_at: string
+}
