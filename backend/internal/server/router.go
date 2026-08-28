@@ -7,6 +7,7 @@ import (
 
 	"github.com/orgmelethil/playhub/backend/internal/admin"
 	"github.com/orgmelethil/playhub/backend/internal/auth"
+	"github.com/orgmelethil/playhub/backend/internal/bookings"
 	"github.com/orgmelethil/playhub/backend/internal/config"
 	"github.com/orgmelethil/playhub/backend/internal/health"
 	"github.com/orgmelethil/playhub/backend/internal/httpx"
@@ -22,13 +23,14 @@ const APIPrefix = "/api/v1"
 // Dependencies are everything the router needs, passed in by the composition
 // root in cmd/api. The router constructs nothing itself.
 type Dependencies struct {
-	Config  *config.Config
-	Logger  *slog.Logger
-	Health  *health.Handler
-	Auth    *auth.Handler
-	Players *players.Handler
-	Owners  *owners.Handler
-	Admin   *admin.Handler
+	Config   *config.Config
+	Logger   *slog.Logger
+	Health   *health.Handler
+	Auth     *auth.Handler
+	Players  *players.Handler
+	Owners   *owners.Handler
+	Admin    *admin.Handler
+	Bookings *bookings.Handler
 }
 
 // NewRouter builds the application handler: the route table wrapped in the
@@ -49,6 +51,7 @@ func NewRouter(deps Dependencies) http.Handler {
 	deps.Players.Routes(mux, APIPrefix)
 	deps.Owners.Routes(mux, APIPrefix)
 	deps.Admin.Routes(mux, APIPrefix)
+	deps.Bookings.Routes(mux, APIPrefix)
 
 	stack := middleware.Chain(
 		middleware.Recovery(deps.Logger),
