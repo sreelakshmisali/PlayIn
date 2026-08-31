@@ -175,17 +175,10 @@ export function PlayerProfileScreen({ navigation }: Props) {
       {/* ── Sports ────────────────────────────────────────────── */}
       {profile.sports.length > 0 && (
         <View style={styles.section}>
-          <Text variant="label" color="primary" style={styles.sectionLabel}>Sports</Text>
-          <View style={styles.pillRow}>
-            {profile.sports.map((ps) => (
-              <View key={ps.sport.id} style={styles.pill}>
-                <Text variant="caption" color="primary">
-                  {ps.sport.name}
-                  {ps.position ? ` · ${ps.position}` : ''}
-                </Text>
-              </View>
-            ))}
-          </View>
+          <Text variant="sectionTitle" style={styles.sectionLabel}>Sports</Text>
+          <Text variant="body" color="secondary">
+            {profile.sports.map((ps) => ps.sport.name + (ps.position ? ` (${ps.position})` : '')).join(' · ')}
+          </Text>
         </View>
       )}
 
@@ -193,7 +186,7 @@ export function PlayerProfileScreen({ navigation }: Props) {
 
       {/* ── Account info ──────────────────────────────────────── */}
       <View style={styles.section}>
-        <Text variant="label" color="primary" style={styles.sectionLabel}>Account</Text>
+        <Text variant="sectionTitle" style={styles.sectionLabel}>Account</Text>
         {user && (
           <>
             <InfoRow label="Email" value={user.email} />
@@ -274,17 +267,6 @@ const styles = StyleSheet.create({
   },
   sectionLabel: {
     marginBottom: spacing.sm,
-  },
-
-  // Sports pills
-  pillRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
-  },
-  pill: {
-    ...cardPresets.pill,
-    backgroundColor: theme.surfaceMuted,
   },
 
   // Info rows

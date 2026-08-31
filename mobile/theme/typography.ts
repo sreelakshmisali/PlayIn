@@ -62,15 +62,10 @@ export const typography = {
   /** Screen title — the name of the screen itself (a profile's name, a
    * screen header). */
   screenTitle: { fontSize: fontSizes.xxl, lineHeight: lineHeights.xxl, fontWeight: fontWeights.bold, letterSpacing: -0.3 },
-  /** @deprecated use `screenTitle` — kept as an alias so existing screens
-   * don't need to change; same values. */
-  title: { fontSize: fontSizes.xxl, lineHeight: lineHeights.xxl, fontWeight: fontWeights.bold, letterSpacing: -0.3 },
 
   /** Section title — a heading inside a screen (a card's title, a group of
    * fields). Also usable as a list item's primary line. */
   sectionTitle: { fontSize: fontSizes.lg, lineHeight: lineHeights.lg, fontWeight: fontWeights.semibold },
-  /** @deprecated use `sectionTitle` — kept as an alias; same values. */
-  heading: { fontSize: fontSizes.lg, lineHeight: lineHeights.lg, fontWeight: fontWeights.semibold },
 
   /** Body — the default for paragraphs and read-only field values. */
   body: { fontSize: fontSizes.md, lineHeight: lineHeights.md, fontWeight: fontWeights.regular },
@@ -78,8 +73,6 @@ export const typography = {
   /** Body emphasized — a body line that needs a touch more weight (a value
    * next to a muted label), without escalating to a heading. */
   bodyEmphasized: { fontSize: fontSizes.md, lineHeight: lineHeights.md, fontWeight: fontWeights.medium },
-  /** @deprecated use `bodyEmphasized` — kept as an alias; same values. */
-  bodyMedium: { fontSize: fontSizes.md, lineHeight: lineHeights.md, fontWeight: fontWeights.medium },
 
   /** Caption — secondary text under a title, a form field's error message. */
   caption: { fontSize: fontSizes.sm, lineHeight: lineHeights.sm, fontWeight: fontWeights.regular },

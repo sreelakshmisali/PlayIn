@@ -4,7 +4,7 @@ import { theme, typography } from '../theme'
 
 type Variant = keyof typeof typography
 
-type Color = 'primary' | 'secondary' | 'muted' | 'disabled' | 'onPrimary' | 'danger' | 'success' | 'warning' | 'info'
+type Color = 'primary' | 'secondary' | 'muted' | 'disabled' | 'onPrimary' | 'danger' | 'success' | 'warning'
 
 const colorMap: Record<Color, string> = {
   primary: theme.textPrimary,
@@ -15,7 +15,6 @@ const colorMap: Record<Color, string> = {
   danger: theme.dangerText,
   success: theme.successText,
   warning: theme.warningText,
-  info: theme.infoText,
 }
 
 interface TextProps extends RNTextProps {

@@ -91,7 +91,7 @@ const styles = StyleSheet.create({
 
   // Full error state (with retry)
   fullContainer: {
-    paddingVertical: spacing.xxl,
+    paddingVertical: 64,
     paddingHorizontal: spacing.lg,
     alignItems: 'center',
   },

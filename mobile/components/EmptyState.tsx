@@ -49,7 +49,7 @@ export function EmptyState({ title, message, icon, actionLabel, onAction }: Empt
 
 const styles = StyleSheet.create({
   container: {
-    paddingVertical: spacing.xxl,
+    paddingVertical: 64,
     paddingHorizontal: spacing.lg,
     alignItems: 'center',
   },

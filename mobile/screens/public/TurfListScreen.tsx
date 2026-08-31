@@ -193,15 +193,13 @@ const styles = StyleSheet.create({
   chip: {
     minHeight: minTouchTarget,
     borderRadius: radius.pill,
-    borderWidth: 1,
-    borderColor: theme.border,
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.sm,
-    backgroundColor: theme.surface,
+    backgroundColor: theme.surfaceMuted,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  chipActive: { backgroundColor: theme.primary, borderColor: theme.primary },
+  chipActive: { backgroundColor: theme.primary },
   sortRow: {
     flexDirection: 'row',
     alignItems: 'center',

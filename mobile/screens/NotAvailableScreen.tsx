@@ -29,7 +29,7 @@ export function NotAvailableScreen() {
 
 const styles = StyleSheet.create({
   body: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  title: { ...typography.heading, color: theme.textPrimary, textAlign: 'center' },
+  title: { ...typography.sectionTitle, color: theme.textPrimary, textAlign: 'center' },
   subtitle: { ...typography.body, color: theme.textSecondary, textAlign: 'center', marginTop: spacing.sm },
   action: { marginTop: spacing.xl, alignSelf: 'stretch' },
 })

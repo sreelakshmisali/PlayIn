@@ -204,7 +204,7 @@ export function OwnerTurfEditScreen({ route, navigation }: Props) {
 
 const styles = StyleSheet.create({
   statusRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm },
-  title: { ...typography.title, color: theme.textPrimary, flexShrink: 1 },
+  title: { ...typography.screenTitle, color: theme.textPrimary, flexShrink: 1 },
   submitAction: { marginTop: spacing.lg },
   notice: { marginTop: spacing.lg, backgroundColor: theme.warningSurface, borderRadius: 12, padding: spacing.md },
   noticeText: { ...typography.caption, color: theme.warningText },

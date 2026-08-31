@@ -75,7 +75,7 @@ export function OwnerProfileScreen({ navigation }: Props) {
     <Screen>
       <View style={styles.header}>
         <Text style={styles.name}>{profile.display_name}</Text>
-        {profile.phone ? <Text style={styles.meta}>{profile.phone}</Text> : null}
+        {profile.phone ? <Text style={styles.bio}>{profile.phone}</Text> : null}
       </View>
 
       {profile.description ? <Text style={styles.description}>{profile.description}</Text> : null}
@@ -88,9 +88,9 @@ export function OwnerProfileScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  header: { alignItems: 'center' },
-  name: { ...typography.title, color: theme.textPrimary },
-  meta: { ...typography.body, color: theme.textSecondary, marginTop: spacing.xs },
+  header: { marginBottom: spacing.xl },
+  name: { ...typography.screenTitle, color: theme.textPrimary },
+  bio: { ...typography.body, color: theme.textSecondary, marginTop: spacing.sm },
   description: { ...typography.body, color: theme.textPrimary, marginTop: spacing.lg },
   editAction: { marginTop: spacing.xxl },
 })

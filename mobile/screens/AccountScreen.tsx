@@ -53,8 +53,8 @@ function Row({ label, value, last }: { label: string; value: string; last?: bool
 }
 
 const styles = StyleSheet.create({
-  header: { alignItems: 'center', marginTop: spacing.lg },
-  name: { ...typography.title, color: theme.textPrimary },
+  header: { marginBottom: spacing.xl },
+  name: { ...typography.screenTitle, color: theme.textPrimary },
   email: { ...typography.body, color: theme.textSecondary, marginTop: spacing.xs },
   roleBadge: {
     marginTop: spacing.sm,
@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
     borderBottomColor: theme.border,
   },
   rowLast: { borderBottomWidth: 0 },
-  rowLabel: { ...typography.body, color: theme.textSecondary },
-  rowValue: { ...typography.bodyMedium, color: theme.textPrimary },
+  rowLabel: { ...typography.caption, color: theme.textSecondary },
+  rowValue: { ...typography.bodyEmphasized, color: theme.textPrimary },
   signOut: { marginTop: spacing.xl },
 })

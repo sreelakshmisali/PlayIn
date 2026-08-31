@@ -28,7 +28,7 @@ export const stackScreenOptions: NativeStackNavigationOptions = {
   headerShadowVisible: false,
   headerTitleAlign: 'center',
   headerTitleStyle: { ...typography.sectionTitle, color: theme.textPrimary },
-  headerTintColor: theme.primary,
+  headerTintColor: theme.textPrimary,
   headerBackButtonDisplayMode: 'minimal',
   contentStyle: { backgroundColor: theme.background },
 }

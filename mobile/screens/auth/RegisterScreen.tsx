@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native'
 
 import { Button, ErrorBanner, Screen, TextField } from '../../components'
 import { useAuth } from '../../hooks'
-import { spacing, radius, theme, typography } from '../../theme'
+import { spacing, radius, shadows, theme, typography } from '../../theme'
 import { ApiError } from '../../services/api'
 import type { AuthStackParamList } from '../../navigation/types'
 import type { Role } from '../../types/auth'
@@ -45,8 +45,13 @@ export function RegisterScreen({ navigation }: Props) {
 
   return (
     <Screen keyboardSafe>
-      <Text style={styles.title}>Create your account</Text>
-      <Text style={styles.subtitle}>Join as a player or list your turf as an owner.</Text>
+      <View style={styles.header}>
+        <Text style={styles.brand}>
+          PlayHub<Text style={styles.brandAccent}>.</Text>
+        </Text>
+        <Text style={styles.title}>Create your account</Text>
+        <Text style={styles.subtitle}>Join as a player or list your turf as an owner.</Text>
+      </View>
 
       <View style={styles.form}>
         {error ? <ErrorBanner message={error} /> : null}
@@ -112,22 +117,29 @@ export function RegisterScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  title: { ...typography.title, color: theme.textPrimary },
+  header: { marginBottom: spacing.lg },
+  brand: { ...typography.sectionTitle, color: theme.textPrimary, marginBottom: spacing.xl },
+  brandAccent: { color: theme.primary },
+  title: { ...typography.screenTitle, color: theme.textPrimary },
   subtitle: { ...typography.body, color: theme.textSecondary, marginTop: spacing.xs },
-  form: { marginTop: spacing.xl },
+  form: { marginTop: spacing.sm },
   label: { ...typography.label, color: theme.textPrimary, marginBottom: spacing.sm },
-  roleRow: { flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.lg },
+  roleRow: { 
+    flexDirection: 'row', 
+    backgroundColor: theme.surfaceMuted,
+    borderRadius: radius.md,
+    padding: spacing.xs,
+    marginBottom: spacing.lg 
+  },
   roleOption: {
     flex: 1,
-    borderWidth: 1,
-    borderColor: theme.border,
-    borderRadius: radius.md,
-    paddingVertical: spacing.md,
+    borderRadius: radius.sm,
+    paddingVertical: spacing.sm,
     alignItems: 'center',
   },
-  roleOptionSelected: { borderColor: theme.primary, backgroundColor: theme.primarySurface },
-  roleOptionText: { ...typography.bodyMedium, color: theme.textSecondary },
-  roleOptionTextSelected: { color: theme.primaryText },
+  roleOptionSelected: { backgroundColor: theme.surface, ...shadows.sm },
+  roleOptionText: { ...typography.bodyEmphasized, color: theme.textSecondary },
+  roleOptionTextSelected: { color: theme.textPrimary },
   footer: { marginTop: spacing.xl, alignItems: 'center' },
   footerText: { ...typography.body, color: theme.textSecondary },
   footerLink: { color: theme.primaryText, fontWeight: '600' },

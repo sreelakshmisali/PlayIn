@@ -38,10 +38,6 @@ export const colors = {
   amber700: '#b45309',
   amber800: '#92400e',
 
-  blue50: '#eff6ff',
-  blue200: '#bfdbfe',
-  blue700: '#1d4ed8',
-  blue800: '#1e40af',
 
   white: '#ffffff',
 } as const
@@ -84,7 +80,4 @@ export const theme = {
   dangerBorder: colors.red200,
   dangerText: colors.red800,
 
-  info: colors.blue700,
-  infoSurface: colors.blue50,
-  infoText: colors.blue800,
 } as const

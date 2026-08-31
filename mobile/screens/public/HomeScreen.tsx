@@ -4,7 +4,6 @@ import { useCallback, useEffect, useState } from 'react'
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native'
 
 import {
-  Button,
   Divider,
   EmptyState,
   ErrorBanner,
@@ -17,7 +16,7 @@ import {
 import { useAuth } from '../../hooks'
 import { fetchPublicTurfs } from '../../services/owners'
 import { ApiError } from '../../services/api'
-import { iconSizes, minTouchTarget, radius, spacing, theme } from '../../theme'
+import { iconSizes, spacing, theme } from '../../theme'
 import type { Turf } from '../../types/owners'
 
 // HomeScreen is mounted inside both PlayerTabParamList and OwnerTabParamList,
@@ -78,26 +77,16 @@ export function HomeScreen({ navigation }: Props) {
 
   return (
     <Screen>
-      {/* 1. Where/what to book: the greeting and the one primary CTA. */}
-      <View style={styles.hero}>
-        <View style={styles.eyebrowRow}>
-          <IconContainer tone="primary" size="sm">
-            <Ionicons name="football-outline" size={iconSizes.sm} color={theme.primary} />
-          </IconContainer>
-          <Text variant="label" style={styles.eyebrow}>
-            PlayHub
-          </Text>
-        </View>
-        <Text variant="screenTitle" style={styles.title}>
-          {user ? `Welcome back, ${user.full_name.split(' ')[0]}` : 'Welcome'}
+      <View style={styles.header}>
+        <Text variant="screenTitle">
+          {user ? `Hello, ${user.full_name.split(' ')[0]}` : 'PlayHub'}
         </Text>
         <Text variant="body" color="secondary" style={styles.subtitle}>
-          Find a turf, check its availability, and get playing.
+          Find a turf and get playing.
         </Text>
-        <Button label="Find a turf" onPress={goToTurfs} style={styles.cta} />
       </View>
 
-      {/* 3. Quick categories — real sports drawn from the fetched turfs, not a fixed list. */}
+      {/* Quick categories — real sports drawn from the fetched turfs, not a fixed list. */}
       {sportChips.length > 0 && (
         <View style={styles.section}>
           <Text variant="sectionTitle" style={styles.sectionTitle}>
@@ -111,7 +100,7 @@ export function HomeScreen({ navigation }: Props) {
                 accessibilityRole="button"
                 style={({ pressed }) => [styles.chip, pressed && styles.chipPressed]}
               >
-                <Text variant="bodyEmphasized" color="secondary">
+                <Text variant="bodyEmphasized" color="primary">
                   {sport.name}
                 </Text>
               </Pressable>
@@ -122,7 +111,7 @@ export function HomeScreen({ navigation }: Props) {
 
       <Divider />
 
-      {/* 2. Available turfs: a short real preview, not every section as its own card. */}
+      {/* Available turfs: a short real preview, not every section as its own card. */}
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
           <Text variant="sectionTitle" style={styles.sectionTitle}>
@@ -168,24 +157,19 @@ export function HomeScreen({ navigation }: Props) {
 
       <Divider />
 
-      {/* 4. Quick access to bookings — no booking history exists in this API yet,
-          so this stays an honest placeholder rather than invented data or a
-          dead-end tap target. */}
+      {/* Quick access to bookings */}
       <View style={styles.section}>
         <View style={styles.bookingsRow}>
-          <IconContainer tone="muted">
-            <Ionicons name="calendar-outline" size={iconSizes.md} color={theme.textMuted} />
-          </IconContainer>
-          <View style={styles.bookingsText}>
-            <Text variant="bodyEmphasized">Your bookings</Text>
-            <Text variant="caption" color="muted">
-              Booking history will show up here once it's available.
-            </Text>
-          </View>
+          <Text variant="sectionTitle" style={styles.sectionTitle}>
+            Your bookings
+          </Text>
+          <Text variant="body" color="secondary">
+            Booking history will show up here once it's available.
+          </Text>
         </View>
       </View>
 
-      {/* 5. Supporting information — a quiet, real count, not marketing copy. */}
+      {/* Supporting information — a quiet, real count, not marketing copy. */}
       {state.kind === 'ready' && (
         <Text variant="metadata" color="muted" style={styles.footer}>
           {state.turfs.length} {state.turfs.length === 1 ? 'turf is' : 'turfs are'} listed on PlayHub right now.
@@ -196,34 +180,22 @@ export function HomeScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  hero: { marginBottom: spacing.xl },
-  eyebrowRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  eyebrow: { color: theme.primaryText },
-  title: { marginTop: spacing.md },
-  subtitle: { marginTop: spacing.sm },
-  cta: { marginTop: spacing.xl, alignSelf: 'stretch' },
-
+  header: { marginBottom: spacing.xl },
+  subtitle: { marginTop: spacing.xs },
+  
   section: { marginVertical: spacing.lg },
   sectionHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  sectionTitle: { marginBottom: spacing.md },
+  sectionTitle: { marginBottom: spacing.sm },
 
-  chipRow: { gap: spacing.sm, paddingRight: spacing.lg },
+  chipRow: { gap: spacing.md, paddingRight: spacing.lg },
   chip: {
-    minHeight: minTouchTarget,
-    justifyContent: 'center',
-    borderRadius: radius.pill,
-    borderWidth: 1,
-    borderColor: theme.border,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-    backgroundColor: theme.surface,
+    paddingVertical: spacing.xs,
   },
-  chipPressed: { backgroundColor: theme.surfaceMuted },
+  chipPressed: { opacity: 0.6 },
 
   turfList: { gap: spacing.md },
 
-  bookingsRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
-  bookingsText: { flex: 1 },
+  bookingsRow: { gap: spacing.xs },
 
-  footer: { textAlign: 'center', marginTop: spacing.sm, marginBottom: spacing.lg },
+  footer: { textAlign: 'center', marginTop: spacing.xl, marginBottom: spacing.lg },
 })

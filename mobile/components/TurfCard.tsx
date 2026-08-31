@@ -70,7 +70,7 @@ export function TurfCard({ turf, onPress, showStatus }: TurfCardProps) {
           <Image source={{ uri: image.image_url }} style={styles.thumbnail} />
         ) : (
           <View style={[styles.thumbnail, styles.thumbnailPlaceholder]}>
-            <Ionicons name="football-outline" size={iconSizes.lg} color={theme.primary} />
+            <Ionicons name="football-outline" size={iconSizes.lg} color={theme.textMuted} />
           </View>
         )}
 
@@ -90,20 +90,10 @@ export function TurfCard({ turf, onPress, showStatus }: TurfCardProps) {
           </View>
 
           {turf.sports.length > 0 && (
-            <View style={styles.sports}>
-              {turf.sports.slice(0, MAX_SPORT_CHIPS).map((sport) => (
-                <View key={sport.id} style={styles.sportPill}>
-                  <Text variant="caption" color="secondary">
-                    {sport.name}
-                  </Text>
-                </View>
-              ))}
-              {extraSports > 0 && (
-                <View style={styles.sportPill}>
-                  <Text variant="caption" color="secondary">{`+${extraSports}`}</Text>
-                </View>
-              )}
-            </View>
+            <Text variant="caption" color="secondary" style={styles.sportsText} numberOfLines={1}>
+              {turf.sports.slice(0, MAX_SPORT_CHIPS).map(s => s.name).join(' · ')}
+              {extraSports > 0 ? ` · +${extraSports}` : ''}
+            </Text>
           )}
         </View>
       </View>
@@ -133,14 +123,13 @@ export function TurfCard({ turf, onPress, showStatus }: TurfCardProps) {
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', gap: spacing.md },
   thumbnail: { width: THUMBNAIL_SIZE, height: THUMBNAIL_SIZE, borderRadius: radius.md },
-  thumbnailPlaceholder: { backgroundColor: theme.primarySurface, alignItems: 'center', justifyContent: 'center' },
+  thumbnailPlaceholder: { backgroundColor: theme.surfaceMuted, alignItems: 'center', justifyContent: 'center' },
   info: { flex: 1, justifyContent: 'center' },
   nameRow: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: spacing.sm },
   name: { flexShrink: 1 },
   locationRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, marginTop: spacing.xs / 2 },
   locationText: { flexShrink: 1 },
-  sports: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.xs, marginTop: spacing.xs },
-  sportPill: { ...cardPresets.pill, backgroundColor: theme.surfaceMuted },
+  sportsText: { marginTop: spacing.xs },
   metaRow: {
     flexDirection: 'row',
     alignItems: 'center',

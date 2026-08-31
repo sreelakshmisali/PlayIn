@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { StyleSheet, Text, TextInput, View, type TextInputProps } from 'react-native'
 
 import { colors, inputPresets, spacing, theme, typography } from '../theme'
@@ -12,6 +13,7 @@ interface TextFieldProps extends TextInputProps {
  * muted visual treatment rather than looking like an active input. */
 export function TextField({ label, error, style, editable, ...input }: TextFieldProps) {
   const disabled = editable === false
+  const [focused, setFocused] = useState(false)
 
   return (
     <View style={styles.container}>
@@ -19,8 +21,22 @@ export function TextField({ label, error, style, editable, ...input }: TextField
       <TextInput
         {...input}
         editable={editable}
+        onFocus={(e) => {
+          setFocused(true)
+          input.onFocus?.(e)
+        }}
+        onBlur={(e) => {
+          setFocused(false)
+          input.onBlur?.(e)
+        }}
         placeholderTextColor={colors.neutral400}
-        style={[styles.input, disabled && inputPresets.disabled, error ? inputPresets.error : null, style]}
+        style={[
+          styles.input,
+          disabled && inputPresets.disabled,
+          focused && !disabled && !error && inputPresets.focused,
+          error ? inputPresets.error : null,
+          style,
+        ]}
       />
       {error ? (
         <Text style={styles.error} accessibilityRole="alert">
@@ -32,7 +48,7 @@ export function TextField({ label, error, style, editable, ...input }: TextField
 }
 
 const styles = StyleSheet.create({
-  container: { marginBottom: spacing.lg },
+  container: { marginBottom: spacing.xl },
   label: { ...typography.label, color: theme.textPrimary, marginBottom: spacing.xs },
   labelDisabled: { color: theme.textDisabled },
   input: inputPresets.field,

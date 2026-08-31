@@ -136,7 +136,7 @@ export function TurfDetailScreen({ route }: Props) {
         <Image source={{ uri: heroImage.image_url }} style={styles.hero} />
       ) : (
         <View style={[styles.hero, styles.heroPlaceholder]}>
-          <Ionicons name="football-outline" size={iconSizes.xl} color={theme.primary} />
+          <Ionicons name="football-outline" size={iconSizes.xl} color={theme.textMuted} />
         </View>
       )}
 
@@ -163,21 +163,15 @@ export function TurfDetailScreen({ route }: Props) {
       </Text>
 
       {turf.sports.length > 0 && (
-        <View style={styles.pillRow}>
-          {turf.sports.map((sport) => (
-            <View key={sport.id} style={styles.pill}>
-              <Text variant="caption" color="secondary">
-                {sport.name}
-              </Text>
-            </View>
-          ))}
-        </View>
+        <Text variant="bodyEmphasized" color="secondary" style={styles.sportsText}>
+          {turf.sports.map(s => s.name).join(' · ')}
+        </Text>
       )}
 
       {turf.description ? (
         <>
           <Divider />
-          <Text variant="body" color="primary">
+          <Text variant="body">
             {turf.description}
           </Text>
         </>
@@ -186,24 +180,18 @@ export function TurfDetailScreen({ route }: Props) {
       {turf.amenities.length > 0 && (
         <>
           <Divider />
-          <Text variant="label" color="primary" style={styles.sectionTitle}>
+          <Text variant="sectionTitle" style={styles.sectionTitle}>
             Amenities
           </Text>
-          <View style={styles.pillRow}>
-            {turf.amenities.map((amenity) => (
-              <View key={amenity.id} style={[styles.pill, styles.pillAccent]}>
-                <Text variant="caption" color="info" style={styles.pillTextAccent}>
-                  {amenity.name}
-                </Text>
-              </View>
-            ))}
-          </View>
+          <Text variant="body" color="secondary" style={styles.amenitiesText}>
+            {turf.amenities.map(a => a.name).join(' · ')}
+          </Text>
         </>
       )}
 
       <Divider />
 
-      <Surface variant="muted" style={styles.summary}>
+      <Surface style={styles.summary}>
         <View style={styles.summaryRow}>
           <View style={styles.priceBlock}>
             <Text variant="metadata" color="muted">
@@ -258,7 +246,7 @@ export function TurfDetailScreen({ route }: Props) {
 
 const styles = StyleSheet.create({
   hero: { width: '100%', height: HERO_HEIGHT, borderRadius: radius.lg },
-  heroPlaceholder: { backgroundColor: theme.primarySurface, alignItems: 'center', justifyContent: 'center' },
+  heroPlaceholder: { backgroundColor: theme.surfaceMuted, alignItems: 'center', justifyContent: 'center' },
   gallery: { gap: spacing.sm, marginTop: spacing.sm },
   thumbnail: { width: THUMBNAIL_SIZE, height: THUMBNAIL_SIZE, borderRadius: radius.sm },
   name: { marginTop: spacing.lg },
@@ -270,11 +258,9 @@ const styles = StyleSheet.create({
   locationIcon: { marginTop: 2 },
   locationText: { flexShrink: 1 },
   listedBy: { marginTop: spacing.xs / 2 },
-  pillRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginTop: spacing.md },
-  pill: { ...cardPresets.pill, backgroundColor: theme.surfaceMuted },
-  pillAccent: { backgroundColor: theme.infoSurface },
-  pillTextAccent: { color: theme.infoText },
-  sectionTitle: { marginBottom: 0 },
+  sportsText: { marginTop: spacing.md },
+  sectionTitle: { marginBottom: spacing.xs },
+  amenitiesText: { marginTop: 0 },
   summary: { marginTop: spacing.lg },
   summaryRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', gap: spacing.md },
   // Both sides can shrink so a large price or a long hours/capacity line

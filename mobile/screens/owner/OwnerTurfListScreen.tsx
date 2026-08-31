@@ -47,7 +47,7 @@ export function OwnerTurfListScreen({ navigation }: Props) {
 
   const header = (
     <View style={styles.header}>
-      <Text style={styles.title}>Your turfs</Text>
+      <Text style={styles.screenTitle}>Your turfs</Text>
       <Button label="New turf" onPress={() => navigation.navigate('OwnerTurfEdit', {})} />
     </View>
   )
@@ -64,7 +64,7 @@ export function OwnerTurfListScreen({ navigation }: Props) {
         contentContainerStyle={styles.list}
         ListHeaderComponent={
           <>
-            <Text style={styles.title}>Your turfs</Text>
+            <Text style={styles.screenTitle}>Your turfs</Text>
             <EmptyState
               icon={
                 <IconContainer tone="muted" size="lg">
@@ -90,7 +90,7 @@ export function OwnerTurfListScreen({ navigation }: Props) {
         contentContainerStyle={styles.list}
         ListHeaderComponent={
           <>
-            <Text style={styles.title}>Your turfs</Text>
+            <Text style={styles.screenTitle}>Your turfs</Text>
             <ErrorBanner message={state.message} onRetry={() => void load()} />
           </>
         }
@@ -133,6 +133,6 @@ export function OwnerTurfListScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   list: { padding: spacing.lg, flexGrow: 1 },
   header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: spacing.lg, gap: spacing.md },
-  title: { ...typography.title, color: theme.textPrimary },
+  screenTitle: { ...typography.screenTitle, color: theme.textPrimary },
   separator: { height: spacing.md },
 })

@@ -41,8 +41,13 @@ export function LoginScreen({ navigation }: Props) {
 
   return (
     <Screen keyboardSafe>
-      <Text style={styles.title}>Sign in</Text>
-      <Text style={styles.subtitle}>Book turfs, join teams and track your game.</Text>
+      <View style={styles.header}>
+        <Text style={styles.brand}>
+          PlayHub<Text style={styles.brandAccent}>.</Text>
+        </Text>
+        <Text style={styles.title}>Sign in</Text>
+        <Text style={styles.subtitle}>Book turfs, join teams and track your game.</Text>
+      </View>
 
       <View style={styles.form}>
         {error ? <ErrorBanner message={error} /> : null}
@@ -80,9 +85,12 @@ export function LoginScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-  title: { ...typography.title, color: theme.textPrimary },
+  header: { marginBottom: spacing.lg },
+  brand: { ...typography.sectionTitle, color: theme.textPrimary, marginBottom: spacing.xl },
+  brandAccent: { color: theme.primary },
+  title: { ...typography.screenTitle, color: theme.textPrimary },
   subtitle: { ...typography.body, color: theme.textSecondary, marginTop: spacing.xs },
-  form: { marginTop: spacing.xl },
+  form: { marginTop: spacing.sm },
   footer: { marginTop: spacing.xl, alignItems: 'center' },
   footerText: { ...typography.body, color: theme.textSecondary },
   footerLink: { color: theme.primaryText, fontWeight: '600' },

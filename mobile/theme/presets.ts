@@ -36,7 +36,7 @@ export const buttonPresets = {
 
   labelColor: {
     primary: theme.textOnPrimary,
-    secondary: theme.primaryText,
+    secondary: theme.textPrimary,
     danger: theme.danger,
   } satisfies Record<Variant, string>,
 
