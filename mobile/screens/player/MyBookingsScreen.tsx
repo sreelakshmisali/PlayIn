@@ -81,8 +81,12 @@ function formatTimeRange(start: string, end: string): string {
 
 function BookingCard({ booking, onPress }: { booking: Booking; onPress: () => void }) {
   return (
-    <Surface variant="card" style={styles.card}>
-      {/* Top row: turf icon + status */}
+    <Pressable
+      style={({ pressed }) => [styles.card, pressed && { backgroundColor: theme.surfaceMuted }]}
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={`Booking at ${booking.turf.name}`}
+    >
       <View style={styles.cardHeader}>
         <View style={styles.sportRow}>
           <IconContainer tone="primary" size="sm">
@@ -95,7 +99,6 @@ function BookingCard({ booking, onPress }: { booking: Booking; onPress: () => vo
         <StatusPill status={booking.status} />
       </View>
 
-      {/* Location */}
       <View style={styles.infoRow}>
         <Ionicons name="location-outline" size={iconSizes.sm} color={theme.textMuted} />
         <Text variant="caption" color="secondary" numberOfLines={1} style={styles.infoText}>
@@ -103,10 +106,6 @@ function BookingCard({ booking, onPress }: { booking: Booking; onPress: () => vo
         </Text>
       </View>
 
-      <Divider spacing="md" />
-
-      {/* Date, time, price row — wraps on narrow screens instead of
-          overflowing when the date/time text or price runs long. */}
       <View style={styles.detailsRow}>
         <View style={styles.detailItem}>
           <Ionicons name="calendar-outline" size={iconSizes.sm} color={theme.textMuted} />
@@ -120,20 +119,11 @@ function BookingCard({ booking, onPress }: { booking: Booking; onPress: () => vo
           {`₹${booking.price}`}
         </Text>
       </View>
-
-      <Divider spacing="md" />
-      <Pressable
-        style={styles.actionRow}
-        accessibilityRole="button"
-        accessibilityLabel="View booking details"
-        onPress={onPress}
-      >
-        <Text variant="caption" color="primary" style={styles.actionText}>
-          View details
-        </Text>
-        <Ionicons name="chevron-forward" size={iconSizes.sm} color={theme.primary} />
-      </Pressable>
-    </Surface>
+      <View style={styles.actionRow}>
+        <Text variant="bodyEmphasized" color="primary">View details</Text>
+        <Ionicons name="arrow-forward" size={iconSizes.sm} color={theme.textPrimary} />
+      </View>
+    </Pressable>
   )
 }
 
@@ -314,35 +304,30 @@ const styles = StyleSheet.create({
     minHeight: minTouchTarget,
     gap: spacing.xs,
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: radius.pill,
-    borderWidth: 1,
-    borderColor: theme.border,
-    backgroundColor: theme.surface,
+    borderBottomWidth: 2,
+    borderBottomColor: 'transparent',
   },
   tabActive: {
-    backgroundColor: theme.primary,
-    borderColor: theme.primary,
+    borderBottomColor: theme.primary,
   },
   tabLabel: {
-    ...typography.caption,
-    fontWeight: fontWeights.medium,
+    ...typography.bodyEmphasized,
     color: theme.textSecondary,
   },
   tabLabelActive: {
-    color: theme.textOnPrimary,
+    color: theme.primary,
   },
   countBadge: {
     minWidth: 18,
     height: 18,
     borderRadius: 9,
-    backgroundColor: theme.border,
+    backgroundColor: theme.surfaceMuted,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: spacing.xs,
   },
   countBadgeActive: {
-    backgroundColor: theme.overlayOnPrimary,
+    backgroundColor: theme.primary,
   },
   countText: {
     ...typography.metadata,
@@ -363,12 +348,16 @@ const styles = StyleSheet.create({
 
   // Card
   card: {
-    gap: 0,
+    gap: spacing.xs,
+    paddingVertical: spacing.lg,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: theme.border,
   },
   cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: spacing.xs,
   },
   sportRow: {
     flexDirection: 'row',
@@ -418,9 +407,9 @@ const styles = StyleSheet.create({
   actionRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
     minHeight: minTouchTarget,
-    gap: spacing.xs,
+    paddingTop: spacing.xs,
   },
   actionText: {
     color: theme.primary,

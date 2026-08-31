@@ -7,7 +7,7 @@ import { Button, Divider, EmptyState, ErrorBanner, IconContainer, LoadingView, S
 import { useAuth } from '../../hooks'
 import { fetchMyPlayerProfile } from '../../services/players'
 import { ApiError } from '../../services/api'
-import { cardPresets, iconSizes, spacing, theme } from '../../theme'
+import { cardPresets, iconSizes, radius, spacing, theme } from '../../theme'
 import type { PlayerProfile } from '../../types/players'
 
 type Props = BottomTabScreenProps<Record<string, object | undefined>>
@@ -153,7 +153,6 @@ export function PlayerProfileScreen({ navigation }: Props) {
 
   return (
     <Screen>
-      {/* ── Identity ──────────────────────────────────────────── */}
       <View style={styles.identityBlock}>
         <Avatar name={profile.display_name} imageUrl={profile.image_url} />
         <Text variant="screenTitle" color="primary" style={styles.identityName}>
@@ -172,53 +171,50 @@ export function PlayerProfileScreen({ navigation }: Props) {
         ) : null}
       </View>
 
-      {/* ── Sports ────────────────────────────────────────────── */}
-      {profile.sports.length > 0 && (
-        <View style={styles.section}>
-          <Text variant="sectionTitle" style={styles.sectionLabel}>Sports</Text>
-          <Text variant="body" color="secondary">
-            {profile.sports.map((ps) => ps.sport.name + (ps.position ? ` (${ps.position})` : '')).join(' · ')}
-          </Text>
-        </View>
-      )}
-
-      <Divider spacing="lg" />
-
-      {/* ── Account info ──────────────────────────────────────── */}
-      <View style={styles.section}>
-        <Text variant="sectionTitle" style={styles.sectionLabel}>Account</Text>
-        {user && (
-          <>
-            <InfoRow label="Email" value={user.email} />
-            <InfoRow label="Role" value={user.role === 'PLAYER' ? 'Player' : user.role === 'OWNER' ? 'Owner' : user.role} />
-            <InfoRow
-              label="Status"
-              value={user.is_active ? 'Active' : 'Deactivated'}
-              valueColor={user.is_active ? 'success' : 'danger'}
-            />
-            <InfoRow label="Member since" value={new Date(user.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })} />
-          </>
+      <View style={styles.contentBlock}>
+        {profile.sports.length > 0 && (
+          <View style={styles.section}>
+            <Text variant="sectionTitle" style={styles.sectionLabel}>Sports</Text>
+            <Text variant="bodyEmphasized" color="primary">
+              {profile.sports.map((ps) => ps.sport.name + (ps.position ? ` (${ps.position})` : '')).join(' · ')}
+            </Text>
+          </View>
         )}
-      </View>
 
-      <Divider spacing="lg" />
+        <View style={styles.section}>
+          <Text variant="sectionTitle" style={styles.sectionLabel}>Profile information</Text>
+          {user && (
+            <View style={styles.infoGroup}>
+              <InfoRow label="Email" value={user.email} />
+              <InfoRow label="Role" value={user.role === 'PLAYER' ? 'Player' : user.role === 'OWNER' ? 'Owner' : user.role} />
+              <InfoRow
+                label="Status"
+                value={user.is_active ? 'Active' : 'Deactivated'}
+                valueColor={user.is_active ? 'success' : 'danger'}
+              />
+              <InfoRow label="Member since" value={new Date(user.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })} />
+            </View>
+          )}
+        </View>
 
-      {/* ── Actions ───────────────────────────────────────────── */}
-      <View style={styles.section}>
-        <MenuRow icon="create-outline" label="Edit profile" onPress={() => navigation.navigate('PlayerProfileEdit')} />
-      </View>
+        <View style={styles.section}>
+          <Text variant="sectionTitle" style={styles.sectionLabel}>Account actions</Text>
+          <View style={styles.infoGroup}>
+            <MenuRow icon="create-outline" label="Edit profile" onPress={() => navigation.navigate('PlayerProfileEdit')} />
+          </View>
+        </View>
 
-      {/* ── Sign out ──────────────────────────────────────────── */}
-      <View style={styles.signOutBlock}>
-        <Button
-          label={signingOut ? 'Signing out' : 'Sign out'}
-          variant="secondary"
-          pending={signingOut}
-          onPress={() => {
-            setSigningOut(true)
-            void logout()
-          }}
-        />
+        <View style={styles.signOutBlock}>
+          <Button
+            label={signingOut ? 'Signing out' : 'Sign out'}
+            variant="secondary"
+            pending={signingOut}
+            onPress={() => {
+              setSigningOut(true)
+              void logout()
+            }}
+          />
+        </View>
       </View>
     </Screen>
   )
@@ -261,12 +257,30 @@ const styles = StyleSheet.create({
     maxWidth: 280,
   },
 
+  // Blocks
+  contentBlock: {
+    gap: spacing.xl,
+    marginTop: spacing.xl,
+  },
+  emptyBlock: {
+    marginTop: spacing.xl,
+  },
+  signOutBlock: {
+    marginTop: spacing.xl,
+    paddingBottom: spacing.lg,
+  },
+
   // Sections
   section: {
-    marginTop: spacing.xs,
+    gap: spacing.xs,
   },
   sectionLabel: {
-    marginBottom: spacing.sm,
+    marginBottom: spacing.xs,
+  },
+  infoGroup: {
+    backgroundColor: theme.surfaceMuted,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.md,
   },
 
   // Info rows
@@ -276,6 +290,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.md,
     paddingVertical: spacing.sm,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: theme.border,
   },
   // A long email address gets an ellipsis instead of overflowing past
   // the card edge or squeezing the "Email"/"Role"/etc. label.
@@ -293,14 +309,5 @@ const styles = StyleSheet.create({
   },
   menuLabel: {
     flex: 1,
-  },
-
-  // Blocks
-  emptyBlock: {
-    marginTop: spacing.xl,
-  },
-  signOutBlock: {
-    marginTop: spacing.xxl,
-    paddingBottom: spacing.lg,
   },
 })
