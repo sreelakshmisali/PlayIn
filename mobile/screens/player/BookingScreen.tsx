@@ -159,12 +159,12 @@ export function BookingScreen({ route }: Props) {
         {turf.address}, {turf.city}
       </Text>
 
-      <Text variant="label" color="primary" style={styles.sectionLabel}>
+      <Text variant="sectionTitle" style={styles.sectionLabel}>
         Date
       </Text>
       <DateStrip dates={dates} selectedDate={selectedDate} onSelectDate={handleSelectDate} />
 
-      <Text variant="label" color="primary" style={styles.sectionLabel}>
+      <Text variant="sectionTitle" style={styles.sectionLabel}>
         Time
       </Text>
       {slotsState.kind === 'loading' && <LoadingView size="small" inline message="Loading slots" />}

@@ -27,7 +27,6 @@ type State =
   | { kind: 'missing' }
   | { kind: 'failed'; message: string; isNetworkError: boolean }
 
-const HERO_HEIGHT = 200
 const THUMBNAIL_SIZE = 56
 
 /** "HH:MM" → minutes since midnight, or null if unparseable. Mirrors
@@ -131,143 +130,131 @@ export function TurfDetailScreen({ route }: Props) {
   const openStatus = isOpenNow(turf.opening_time, turf.closing_time)
 
   return (
-    <Screen>
-      {heroImage ? (
-        <Image source={{ uri: heroImage.image_url }} style={styles.hero} />
-      ) : (
-        <View style={[styles.hero, styles.heroPlaceholder]}>
-          <Ionicons name="football-outline" size={iconSizes.xl} color={theme.textMuted} />
-        </View>
-      )}
+    <Screen scroll={false} contentStyle={styles.noPadding}>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        {heroImage ? (
+          <Image source={{ uri: heroImage.image_url }} style={styles.hero} />
+        ) : (
+          <View style={[styles.hero, styles.heroPlaceholder]}>
+            <Ionicons name="football-outline" size={iconSizes.xl} color={theme.textMuted} />
+          </View>
+        )}
 
-      {galleryImages.length > 0 && (
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.gallery}>
-          {galleryImages.map((image) => (
-            <Image key={image.id} source={{ uri: image.image_url }} style={styles.thumbnail} />
-          ))}
-        </ScrollView>
-      )}
+        {galleryImages.length > 0 && (
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.gallery}>
+            {galleryImages.map((image) => (
+              <Image key={image.id} source={{ uri: image.image_url }} style={styles.thumbnail} />
+            ))}
+          </ScrollView>
+        )}
 
-      <Text variant="screenTitle" style={styles.name}>
-        {turf.name}
-      </Text>
-
-      <View style={styles.locationRow}>
-        <Ionicons name="location-outline" size={iconSizes.sm} color={theme.textMuted} style={styles.locationIcon} />
-        <Text variant="body" color="secondary" style={styles.locationText}>
-          {turf.address}, {turf.city}
-        </Text>
-      </View>
-      <Text variant="metadata" color="muted" style={styles.listedBy}>
-        Listed by {turf.owner_display_name}
-      </Text>
-
-      {turf.sports.length > 0 && (
-        <Text variant="bodyEmphasized" color="secondary" style={styles.sportsText}>
-          {turf.sports.map(s => s.name).join(' · ')}
-        </Text>
-      )}
-
-      {turf.description ? (
-        <>
-          <Divider />
-          <Text variant="body">
-            {turf.description}
+        <View style={styles.body}>
+          <Text variant="screenTitle" style={styles.name}>
+            {turf.name}
           </Text>
-        </>
-      ) : null}
 
-      {turf.amenities.length > 0 && (
-        <>
-          <Divider />
-          <Text variant="sectionTitle" style={styles.sectionTitle}>
-            Amenities
-          </Text>
-          <Text variant="body" color="secondary" style={styles.amenitiesText}>
-            {turf.amenities.map(a => a.name).join(' · ')}
-          </Text>
-        </>
-      )}
-
-      <Divider />
-
-      <Surface style={styles.summary}>
-        <View style={styles.summaryRow}>
-          <View style={styles.priceBlock}>
-            <Text variant="metadata" color="muted">
-              Price
+          <View style={styles.locationRow}>
+            <Ionicons name="location-outline" size={iconSizes.sm} color={theme.textMuted} style={styles.locationIcon} />
+            <Text variant="body" color="secondary" style={styles.locationText}>
+              {turf.address}, {turf.city}
             </Text>
-            {turf.slot_price !== undefined ? (
+          </View>
+
+          {turf.sports.length > 0 && (
+            <Text variant="bodyEmphasized" color="secondary" style={styles.sportsText}>
+              {turf.sports.map(s => s.name).join(' · ')}
+              {turf.amenities.length > 0 && ' · ' + turf.amenities.map(a => a.name).join(' · ')}
+            </Text>
+          )}
+
+          {turf.description ? (
+            <>
+              <Divider style={styles.divider} />
+              <Text variant="body">
+                {turf.description}
+              </Text>
+            </>
+          ) : null}
+
+          <Divider style={styles.divider} />
+
+          <View style={styles.hoursRow}>
+            <StatusDot active={openStatus} />
+            <Text variant="bodyEmphasized" color={openStatus ? 'success' : 'secondary'} numberOfLines={1}>
+              {openStatus === null ? 'Hours' : openStatus ? 'Open now' : 'Closed now'}
+            </Text>
+            <Text variant="body" color="muted" numberOfLines={1}>{`  ${turf.opening_time} – ${turf.closing_time}`}</Text>
+          </View>
+
+          {turf.capacity !== undefined ? (
+            <Text variant="body" color="muted" style={styles.capacityText}>{`${turf.capacity} players maximum`}</Text>
+          ) : null}
+        </View>
+      </ScrollView>
+
+      <View style={styles.stickyFooter}>
+        <View style={styles.footerPriceBlock}>
+          {turf.slot_price !== undefined ? (
+            <>
               <Text variant="priceEmphasis" color="primary">
                 {`₹${turf.slot_price}`}
-                <Text variant="caption" color="muted">
-                  {turf.slot_duration_minutes ? ` / ${turf.slot_duration_minutes}-min slot` : ' / slot'}
-                </Text>
               </Text>
-            ) : (
-              <Text variant="bodyEmphasized" color="secondary">
-                Price on request
+              <Text variant="caption" color="muted">
+                {turf.slot_duration_minutes ? `per ${turf.slot_duration_minutes}-min slot` : 'per slot'}
               </Text>
-            )}
-          </View>
-
-          <View style={styles.hoursBlock}>
-            <View style={styles.hoursRow}>
-              <StatusDot active={openStatus} />
-              <Text variant="caption" color={openStatus ? 'success' : 'secondary'} numberOfLines={1}>
-                {openStatus === null ? 'Hours' : openStatus ? 'Open now' : 'Closed now'}
-              </Text>
-            </View>
-            <Text variant="metadata" color="muted" numberOfLines={1}>{`${turf.opening_time} – ${turf.closing_time}`}</Text>
-            {turf.capacity !== undefined ? (
-              <Text variant="metadata" color="muted" numberOfLines={1}>{`${turf.capacity} players`}</Text>
-            ) : null}
-          </View>
+            </>
+          ) : (
+            <Text variant="bodyEmphasized" color="secondary">
+              Price on request
+            </Text>
+          )}
         </View>
 
         {isPlayer ? (
           <Button
             label="Book this turf"
             onPress={() => navigation.navigate('Booking', { turfId: turf.id })}
-            style={styles.cta}
+            style={styles.ctaButton}
           />
         ) : (
-          <>
-            <Button label="Book this turf" onPress={() => {}} disabled style={styles.cta} />
-            <Text variant="metadata" color="muted" style={styles.ctaNote}>
-              Booking is available to players.
-            </Text>
-          </>
+          <Button label="Players only" onPress={() => {}} disabled style={styles.ctaButton} />
         )}
-      </Surface>
+      </View>
     </Screen>
   )
 }
 
 const styles = StyleSheet.create({
-  hero: { width: '100%', height: HERO_HEIGHT, borderRadius: radius.lg },
+  noPadding: { padding: 0 },
+  scrollContent: { paddingBottom: spacing.xxl * 3 },
+  hero: { width: '100%', height: 280 }, // Taller, bleeding image
   heroPlaceholder: { backgroundColor: theme.surfaceMuted, alignItems: 'center', justifyContent: 'center' },
-  gallery: { gap: spacing.sm, marginTop: spacing.sm },
+  gallery: { gap: spacing.sm, marginTop: spacing.sm, paddingHorizontal: spacing.lg },
   thumbnail: { width: THUMBNAIL_SIZE, height: THUMBNAIL_SIZE, borderRadius: radius.sm },
-  name: { marginTop: spacing.lg },
-  // flex-start (not center) plus a small top nudge on the icon: a long
-  // address wraps to two or three lines here, and center-aligning the
-  // icon against the whole wrapped block leaves it drifting away from
-  // the first line instead of marking it.
+  body: { paddingHorizontal: spacing.lg, paddingVertical: spacing.md },
+  name: { marginTop: spacing.xs },
   locationRow: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.xs, marginTop: spacing.xs },
   locationIcon: { marginTop: 2 },
   locationText: { flexShrink: 1 },
-  listedBy: { marginTop: spacing.xs / 2 },
-  sportsText: { marginTop: spacing.md },
-  sectionTitle: { marginBottom: spacing.xs },
-  amenitiesText: { marginTop: 0 },
-  summary: { marginTop: spacing.lg },
-  summaryRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', gap: spacing.md },
-  // Both sides can shrink so a large price or a long hours/capacity line
-  // doesn't push this row wider than the card on a narrow screen.
-  priceBlock: { flexShrink: 1 },
-  hoursBlock: { flexShrink: 1, alignItems: 'flex-end', gap: spacing.xs / 2 },
+  sportsText: { marginTop: spacing.sm },
+  divider: { marginVertical: spacing.lg },
   hoursRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
-  cta: { marginTop: spacing.lg },
-  ctaNote: { textAlign: 'center', marginTop: spacing.sm },
+  capacityText: { marginTop: spacing.xs },
+  stickyFooter: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: theme.surface,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: theme.border,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.xl,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  footerPriceBlock: { flexShrink: 1, marginRight: spacing.md },
+  ctaButton: { paddingHorizontal: spacing.xl },
 })
