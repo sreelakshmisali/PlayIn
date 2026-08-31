@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native'
 
 import {
+  Button,
   Divider,
   EmptyState,
   ErrorBanner,
@@ -82,8 +83,11 @@ export function HomeScreen({ navigation }: Props) {
           {user ? `Hello, ${user.full_name.split(' ')[0]}` : 'PlayHub'}
         </Text>
         <Text variant="body" color="secondary" style={styles.subtitle}>
-          Find a turf and get playing.
+          Find a turf, choose a time, and get playing.
         </Text>
+        <View style={styles.headerAction}>
+          <Button label="Search turfs" onPress={goToTurfs} />
+        </View>
       </View>
 
       {/* Quick categories — real sports drawn from the fetched turfs, not a fixed list. */}
@@ -182,6 +186,7 @@ export function HomeScreen({ navigation }: Props) {
 const styles = StyleSheet.create({
   header: { marginBottom: spacing.xl },
   subtitle: { marginTop: spacing.xs },
+  headerAction: { marginTop: spacing.lg, alignSelf: 'flex-start' },
   
   section: { marginVertical: spacing.lg },
   sectionHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },

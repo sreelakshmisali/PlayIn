@@ -3,16 +3,11 @@ import { Image, StyleSheet, View } from 'react-native'
 
 import { cardPresets, iconSizes, radius, spacing, theme } from '../theme'
 import type { Turf } from '../types/owners'
-import { Divider } from './Divider'
 import { StatusBadge } from './StatusBadge'
 import { StatusDot } from './StatusDot'
 import { Surface } from './Surface'
 import { Text } from './Text'
 
-/** Thumbnail edge, in px. Deliberately small — this is a list row, not a
- * gallery: the image helps identify the venue at a glance, it isn't the
- * point of the card. */
-const THUMBNAIL_SIZE = 72
 /** How many sport chips to show before collapsing the rest into "+N". */
 const MAX_SPORT_CHIPS = 2
 
@@ -64,56 +59,54 @@ export function TurfCard({ turf, onPress, showStatus }: TurfCardProps) {
   const openStatus = isOpenNow(turf.opening_time, turf.closing_time)
 
   return (
-    <Surface onPress={onPress} accessibilityLabel={turf.name}>
-      <View style={styles.row}>
+    <Surface onPress={onPress} accessibilityLabel={turf.name} style={styles.surface}>
+      <View style={styles.imageContainer}>
         {image ? (
-          <Image source={{ uri: image.image_url }} style={styles.thumbnail} />
+          <Image source={{ uri: image.image_url }} style={styles.image} />
         ) : (
-          <View style={[styles.thumbnail, styles.thumbnailPlaceholder]}>
-            <Ionicons name="football-outline" size={iconSizes.lg} color={theme.textMuted} />
+          <View style={[styles.image, styles.imagePlaceholder]}>
+            <Ionicons name="football-outline" size={iconSizes.xl} color={theme.textMuted} />
           </View>
         )}
-
-        <View style={styles.info}>
-          <View style={styles.nameRow}>
-            <Text variant="bodyEmphasized" numberOfLines={1} style={styles.name}>
-              {turf.name}
-            </Text>
-            {showStatus && <StatusBadge status={turf.status} />}
+        {showStatus && (
+          <View style={styles.statusOverlay}>
+            <StatusBadge status={turf.status} />
           </View>
+        )}
+      </View>
 
-          <View style={styles.locationRow}>
-            <Ionicons name="location-outline" size={iconSizes.sm} color={theme.textMuted} />
-            <Text variant="caption" color="secondary" numberOfLines={1} style={styles.locationText}>
-              {turf.city}
+      <View style={styles.content}>
+        <View style={styles.titleRow}>
+          <Text variant="sectionTitle" numberOfLines={1} style={styles.name}>
+            {turf.name}
+          </Text>
+          {turf.slot_price !== undefined ? (
+            <Text variant="priceEmphasis" color="primary" style={styles.price}>
+              ₹{turf.slot_price}
             </Text>
-          </View>
-
-          {turf.sports.length > 0 && (
-            <Text variant="caption" color="secondary" style={styles.sportsText} numberOfLines={1}>
-              {turf.sports.slice(0, MAX_SPORT_CHIPS).map(s => s.name).join(' · ')}
-              {extraSports > 0 ? ` · +${extraSports}` : ''}
+          ) : (
+            <Text variant="caption" color="muted">
+              Pricing on request
             </Text>
           )}
         </View>
-      </View>
 
-      <Divider spacing="md" />
-
-      <View style={styles.metaRow}>
-        {turf.slot_price !== undefined ? (
-          <Text variant="priceEmphasis" color="primary" numberOfLines={1}>{`₹${turf.slot_price}`}</Text>
-        ) : (
-          <Text variant="caption" color="muted">
-            Price on request
+        <View style={styles.metadataRow}>
+          <Text variant="body" color="secondary" numberOfLines={1} style={styles.metadataText}>
+            {turf.city}
+            {turf.sports.length > 0 && ` · ${turf.sports.slice(0, MAX_SPORT_CHIPS).map(s => s.name).join(', ')}`}
+            {extraSports > 0 && ` +${extraSports}`}
           </Text>
-        )}
+        </View>
 
-        <View style={styles.hoursRow}>
-          <StatusDot active={openStatus} />
-          <Ionicons name="time-outline" size={iconSizes.sm} color={theme.textMuted} />
-          <Text variant="metadata" color="muted" numberOfLines={1} style={styles.hoursText}>{`${turf.opening_time} – ${turf.closing_time}`}</Text>
-          <Ionicons name="chevron-forward" size={iconSizes.sm} color={theme.textMuted} />
+        <View style={styles.actionRow}>
+          <View style={styles.hoursGroup}>
+            <StatusDot active={openStatus} />
+            <Text variant="caption" color="secondary" numberOfLines={1}>
+              {turf.opening_time} – {turf.closing_time}
+            </Text>
+          </View>
+          <Ionicons name="arrow-forward-outline" size={iconSizes.sm} color={theme.textMuted} />
         </View>
       </View>
     </Surface>
@@ -121,23 +114,59 @@ export function TurfCard({ turf, onPress, showStatus }: TurfCardProps) {
 }
 
 const styles = StyleSheet.create({
-  row: { flexDirection: 'row', gap: spacing.md },
-  thumbnail: { width: THUMBNAIL_SIZE, height: THUMBNAIL_SIZE, borderRadius: radius.md },
-  thumbnailPlaceholder: { backgroundColor: theme.surfaceMuted, alignItems: 'center', justifyContent: 'center' },
-  info: { flex: 1, justifyContent: 'center' },
-  nameRow: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: spacing.sm },
-  name: { flexShrink: 1 },
-  locationRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, marginTop: spacing.xs / 2 },
-  locationText: { flexShrink: 1 },
-  sportsText: { marginTop: spacing.xs },
-  metaRow: {
+  surface: { padding: 0, overflow: 'hidden' }, // Override default card padding to bleed the image
+  imageContainer: {
+    height: 160,
+    backgroundColor: theme.surfaceMuted,
+  },
+  image: {
+    width: '100%',
+    height: '100%',
+  },
+  imagePlaceholder: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  statusOverlay: {
+    position: 'absolute',
+    top: spacing.md,
+    right: spacing.md,
+  },
+  content: {
+    padding: spacing.lg,
+  },
+  titleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    gap: spacing.md,
+  },
+  name: {
+    flex: 1,
+  },
+  price: {
+    flexShrink: 0,
+  },
+  metadataRow: {
+    marginTop: spacing.xs,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  metadataText: {
+    flex: 1,
+  },
+  actionRow: {
+    marginTop: spacing.md,
+    paddingTop: spacing.md,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: theme.border,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  // flexShrink so a long "HH:MM – HH:MM" range gives way to the price
-  // (the more important figure) instead of pushing the row wider than
-  // the card on a narrow screen.
-  hoursRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, flexShrink: 1, marginLeft: spacing.sm },
-  hoursText: { flexShrink: 1 },
+  hoursGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
 })

@@ -178,7 +178,7 @@ function FilterChip({ label, active, onPress }: { label: string; active: boolean
       accessibilityState={{ selected: active }}
       style={[styles.chip, active && styles.chipActive]}
     >
-      <Text variant="bodyEmphasized" color={active ? 'onPrimary' : 'secondary'}>
+      <Text variant="bodyEmphasized" color={active ? 'primary' : 'secondary'}>
         {label}
       </Text>
     </Pressable>
@@ -192,14 +192,12 @@ const styles = StyleSheet.create({
   chipRow: { gap: spacing.sm, marginTop: spacing.lg },
   chip: {
     minHeight: minTouchTarget,
-    borderRadius: radius.pill,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-    backgroundColor: theme.surfaceMuted,
-    alignItems: 'center',
+    paddingHorizontal: spacing.md,
     justifyContent: 'center',
+    borderBottomWidth: 2,
+    borderBottomColor: 'transparent',
   },
-  chipActive: { backgroundColor: theme.primary },
+  chipActive: { borderBottomColor: theme.primary },
   sortRow: {
     flexDirection: 'row',
     alignItems: 'center',
