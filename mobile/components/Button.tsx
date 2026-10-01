@@ -5,8 +5,6 @@ import { buttonPresets, theme, typography } from '../theme'
 
 type Variant = 'primary' | 'secondary' | 'danger'
 
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable)
-
 interface ButtonProps {
   label: string
   onPress: () => void
@@ -36,28 +34,28 @@ export function Button({ label, onPress, variant = 'primary', pending = false, d
   const { animatedStyle, onPressIn, onPressOut } = usePressScale()
 
   return (
-    <AnimatedPressable
-      onPress={onPress}
-      onPressIn={isDisabled ? undefined : onPressIn}
-      onPressOut={isDisabled ? undefined : onPressOut}
-      disabled={isDisabled}
-      accessibilityRole="button"
-      accessibilityState={{ disabled: isDisabled, busy: pending }}
-      style={({ pressed }: { pressed: boolean }) => [
-        styles.base,
-        buttonPresets.variant[variant],
-        isDisabled && styles.disabled,
-        pressed && !isDisabled && styles.pressed,
-        animatedStyle,
-        style,
-      ]}
-    >
-      {pending ? (
-        <ActivityIndicator color={variant === 'secondary' ? theme.primary : theme.textOnPrimary} />
-      ) : (
-        <Text style={[styles.label, { color: buttonPresets.labelColor[variant] }]}>{label}</Text>
-      )}
-    </AnimatedPressable>
+    <Animated.View style={[animatedStyle, style]}>
+      <Pressable
+        onPress={onPress}
+        onPressIn={isDisabled ? undefined : onPressIn}
+        onPressOut={isDisabled ? undefined : onPressOut}
+        disabled={isDisabled}
+        accessibilityRole="button"
+        accessibilityState={{ disabled: isDisabled, busy: pending }}
+        style={({ pressed }: { pressed: boolean }) => [
+          styles.base,
+          buttonPresets.variant[variant],
+          isDisabled && styles.disabled,
+          pressed && !isDisabled && styles.pressed,
+        ]}
+      >
+        {pending ? (
+          <ActivityIndicator color={variant === 'secondary' ? theme.primary : theme.textOnPrimary} />
+        ) : (
+          <Text style={[styles.label, { color: buttonPresets.labelColor[variant] }]}>{label}</Text>
+        )}
+      </Pressable>
+    </Animated.View>
   )
 }
 

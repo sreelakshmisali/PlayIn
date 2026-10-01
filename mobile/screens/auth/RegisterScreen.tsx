@@ -1,10 +1,10 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { useState } from 'react'
-import { Pressable, StyleSheet, Text, View } from 'react-native'
+import { Pressable, StyleSheet, View } from 'react-native'
 
-import { Button, ErrorBanner, Screen, TextField } from '../../components'
+import { Button, ErrorBanner, Screen, Text, TextField } from '../../components'
 import { useAuth } from '../../hooks'
-import { spacing, radius, shadows, theme, typography } from '../../theme'
+import { spacing, radius, shadows, theme } from '../../theme'
 import { ApiError } from '../../services/api'
 import type { AuthStackParamList } from '../../navigation/types'
 import type { Role } from '../../types/auth'
@@ -44,72 +44,83 @@ export function RegisterScreen({ navigation }: Props) {
   }
 
   return (
-    <Screen keyboardSafe>
-      <View style={styles.header}>
-        <Text style={styles.brand}>
-          PlayHub<Text style={styles.brandAccent}>.</Text>
-        </Text>
-        <Text style={styles.title}>Create your account</Text>
-        <Text style={styles.subtitle}>Join as a player or list your turf as an owner.</Text>
-      </View>
-
-      <View style={styles.form}>
-        {error ? <ErrorBanner message={error} /> : null}
-
-        <Text style={styles.label}>I am a</Text>
-        <View style={styles.roleRow}>
-          {SELF_ASSIGNABLE_ROLES.map((option) => {
-            const selected = option === role
-            return (
-              <Pressable
-                key={option}
-                onPress={() => setRole(option)}
-                accessibilityRole="radio"
-                accessibilityState={{ selected }}
-                style={[styles.roleOption, selected && styles.roleOptionSelected]}
-              >
-                <Text style={[styles.roleOptionText, selected && styles.roleOptionTextSelected]}>
-                  {ROLE_LABELS[option]}
-                </Text>
-              </Pressable>
-            )
-          })}
+    <Screen keyboardSafe contentStyle={styles.container}>
+      <View style={styles.content}>
+        <View style={styles.header}>
+          <Text variant="sectionTitle" color="primary" style={styles.brand}>
+            PlayHub<Text variant="sectionTitle" style={styles.brandAccent}>.</Text>
+          </Text>
+          <Text variant="screenTitle" color="primary">
+            Create your account
+          </Text>
+          <Text variant="body" color="secondary" style={styles.subtitle}>
+            Join as a player or list your turf as an owner.
+          </Text>
         </View>
 
-        <TextField
-          label="Full name"
-          value={fullName}
-          onChangeText={setFullName}
-          error={fieldErrors.full_name}
-          autoComplete="name"
-          placeholder="Your name"
-        />
-        <TextField
-          label="Email"
-          value={email}
-          onChangeText={setEmail}
-          error={fieldErrors.email}
-          autoCapitalize="none"
-          autoComplete="email"
-          keyboardType="email-address"
-          placeholder="you@example.com"
-        />
-        <TextField
-          label="Password"
-          value={password}
-          onChangeText={setPassword}
-          error={fieldErrors.password}
-          secureTextEntry
-          autoComplete="password-new"
-          placeholder="At least 10 characters"
-        />
+        <View style={styles.form}>
+          {error ? <ErrorBanner message={error} /> : null}
 
-        <Button label="Create account" onPress={() => void handleSubmit()} pending={pending} />
+          <Text variant="label" color="primary" style={styles.label}>
+            I am a
+          </Text>
+          <View style={styles.roleRow}>
+            {SELF_ASSIGNABLE_ROLES.map((option) => {
+              const selected = option === role
+              return (
+                <Pressable
+                  key={option}
+                  onPress={() => setRole(option)}
+                  accessibilityRole="radio"
+                  accessibilityState={{ selected }}
+                  style={[styles.roleOption, selected && styles.roleOptionSelected]}
+                >
+                  <Text
+                    variant="bodyEmphasized"
+                    color={selected ? 'primary' : 'secondary'}
+                  >
+                    {ROLE_LABELS[option]}
+                  </Text>
+                </Pressable>
+              )
+            })}
+          </View>
+
+          <TextField
+            label="Full name"
+            value={fullName}
+            onChangeText={setFullName}
+            error={fieldErrors.full_name}
+            autoComplete="name"
+            placeholder="Your name"
+          />
+          <TextField
+            label="Email"
+            value={email}
+            onChangeText={setEmail}
+            error={fieldErrors.email}
+            autoCapitalize="none"
+            autoComplete="email"
+            keyboardType="email-address"
+            placeholder="you@example.com"
+          />
+          <TextField
+            label="Password"
+            value={password}
+            onChangeText={setPassword}
+            error={fieldErrors.password}
+            secureTextEntry
+            autoComplete="password-new"
+            placeholder="At least 10 characters"
+          />
+
+          <Button label="Create account" onPress={() => void handleSubmit()} pending={pending} />
+        </View>
       </View>
 
       <Pressable onPress={() => navigation.navigate('Login')} style={styles.footer}>
-        <Text style={styles.footerText}>
-          Already have an account? <Text style={styles.footerLink}>Sign in</Text>
+        <Text variant="body" color="secondary">
+          Already have an account? <Text variant="bodyEmphasized" color="primary">Sign in</Text>
         </Text>
       </Pressable>
     </Screen>
@@ -117,13 +128,14 @@ export function RegisterScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
+  container: { justifyContent: 'space-between' },
+  content: { flex: 1 },
   header: { marginBottom: spacing.lg },
-  brand: { ...typography.sectionTitle, color: theme.textPrimary, marginBottom: spacing.xl },
+  brand: { marginBottom: spacing.xl },
   brandAccent: { color: theme.primary },
-  title: { ...typography.screenTitle, color: theme.textPrimary },
-  subtitle: { ...typography.body, color: theme.textSecondary, marginTop: spacing.xs },
+  subtitle: { marginTop: spacing.xs },
   form: { marginTop: spacing.sm },
-  label: { ...typography.label, color: theme.textPrimary, marginBottom: spacing.sm },
+  label: { marginBottom: spacing.sm },
   roleRow: { 
     flexDirection: 'row', 
     backgroundColor: theme.surfaceMuted,
@@ -138,9 +150,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   roleOptionSelected: { backgroundColor: theme.surface, ...shadows.sm },
-  roleOptionText: { ...typography.bodyEmphasized, color: theme.textSecondary },
-  roleOptionTextSelected: { color: theme.textPrimary },
-  footer: { marginTop: spacing.xl, alignItems: 'center' },
-  footerText: { ...typography.body, color: theme.textSecondary },
-  footerLink: { color: theme.primaryText, fontWeight: '600' },
+  footer: { marginTop: spacing.xl, paddingVertical: spacing.md, alignItems: 'center' },
 })

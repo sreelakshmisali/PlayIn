@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Animated, StyleSheet } from 'react-native'
+import * as SplashScreenModule from 'expo-splash-screen'
 
 import { useAuth, useReducedMotion } from '../hooks'
 import { NotAvailableScreen, SplashScreen } from '../screens'
@@ -20,15 +21,28 @@ export function RootNavigator() {
   // Once the session has resolved (first `loading` → `anonymous`/
   // `authenticated` transition), the splash screen crossfades out over the
   // real content instead of being swapped for it instantly — the splash's
-  // own "transition smoothly into the app" step. This does not affect what
-  // gets rendered underneath or when: `status`/`user` still drive that
-  // exactly as before.
+  // own "transition smoothly into the app" step.
   const [showSplash, setShowSplash] = useState(true)
+  const [minSplashElapsed, setMinSplashElapsed] = useState(false)
   const splashOpacity = useRef(new Animated.Value(1)).current
   const reducedMotion = useReducedMotion()
 
+  // Ensure splash screen remains visible for a minimum duration (1200ms)
+  // so branding is clearly displayed on startup even when auth resolves instantly.
   useEffect(() => {
-    if (status === 'loading' || !showSplash) return
+    const timer = setTimeout(() => {
+      setMinSplashElapsed(true)
+    }, 1200)
+    return () => clearTimeout(timer)
+  }, [])
+
+  useEffect(() => {
+    if (status === 'loading' || !minSplashElapsed || !showSplash) return
+
+    // Dismiss native splash screen smoothly when session resolution & min timer complete
+    SplashScreenModule.hideAsync().catch(() => {
+      /* ignore error if already hidden */
+    })
 
     // Under Reduce Motion, drop the splash immediately rather than
     // crossfading it out — same end state, no animated transform/opacity.
@@ -43,9 +57,9 @@ export function RootNavigator() {
       easing: easings.standard,
       useNativeDriver: true,
     }).start(() => setShowSplash(false))
-  }, [status, showSplash, splashOpacity, reducedMotion])
+  }, [status, minSplashElapsed, showSplash, splashOpacity, reducedMotion])
 
-  if (status === 'loading') {
+  if (status === 'loading' || (!minSplashElapsed && showSplash)) {
     return <SplashScreen />
   }
 
@@ -80,5 +94,5 @@ export function RootNavigator() {
 }
 
 const styles = StyleSheet.create({
-  overlay: { ...StyleSheet.absoluteFillObject },
+  overlay: { ...StyleSheet.absoluteFill },
 })

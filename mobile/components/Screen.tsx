@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View, type ViewStyle } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { SafeAreaView, type Edge } from 'react-native-safe-area-context'
 
 import { layout, theme } from '../theme'
 
@@ -16,6 +16,10 @@ interface ScreenProps {
    * sitting apart from full white — use sparingly (e.g. a booking review
    * step). */
   background?: 'default' | 'muted'
+  /** Which edges to apply safe-area padding to. Defaults to `['top', 'bottom', 'left', 'right']`.
+   * Can be configured (e.g. `['left', 'right']` or `['bottom']`) when navigation headers
+   * or tab bars already apply top/bottom insets. */
+  safeAreaEdges?: Edge[]
   contentStyle?: ViewStyle
 }
 
@@ -26,7 +30,14 @@ interface ScreenProps {
  * actual phone — notches, home indicators, and a keyboard that would
  * otherwise sit on top of the field being typed into.
  */
-export function Screen({ children, scroll = true, keyboardSafe = false, background = 'default', contentStyle }: ScreenProps) {
+export function Screen({
+  children,
+  scroll = true,
+  keyboardSafe = false,
+  background = 'default',
+  safeAreaEdges = ['top', 'bottom', 'left', 'right'],
+  contentStyle,
+}: ScreenProps) {
   const backgroundColor = background === 'muted' ? theme.surfaceMuted : theme.background
 
   const body = scroll ? (
@@ -41,7 +52,7 @@ export function Screen({ children, scroll = true, keyboardSafe = false, backgrou
   )
 
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor }]} edges={['top', 'bottom', 'left', 'right']}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor }]} edges={safeAreaEdges}>
       {keyboardSafe ? (
         <KeyboardAvoidingView
           style={styles.flex}

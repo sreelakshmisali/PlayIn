@@ -1,10 +1,10 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { useState } from 'react'
-import { Pressable, StyleSheet, Text, View } from 'react-native'
+import { Pressable, StyleSheet, View } from 'react-native'
 
-import { Button, ErrorBanner, Screen, TextField } from '../../components'
+import { Button, ErrorBanner, Screen, Text, TextField } from '../../components'
 import { useAuth } from '../../hooks'
-import { spacing, theme, typography } from '../../theme'
+import { spacing, theme } from '../../theme'
 import { ApiError } from '../../services/api'
 import type { AuthStackParamList } from '../../navigation/types'
 
@@ -40,44 +40,50 @@ export function LoginScreen({ navigation }: Props) {
   }
 
   return (
-    <Screen keyboardSafe>
-      <View style={styles.header}>
-        <Text style={styles.brand}>
-          PlayHub<Text style={styles.brandAccent}>.</Text>
-        </Text>
-        <Text style={styles.title}>Sign in</Text>
-        <Text style={styles.subtitle}>Book turfs, join teams and track your game.</Text>
-      </View>
+    <Screen keyboardSafe contentStyle={styles.container}>
+      <View style={styles.content}>
+        <View style={styles.header}>
+          <Text variant="sectionTitle" color="primary" style={styles.brand}>
+            PlayHub<Text variant="sectionTitle" style={styles.brandAccent}>.</Text>
+          </Text>
+          <Text variant="screenTitle" color="primary">
+            Sign in
+          </Text>
+          <Text variant="body" color="secondary" style={styles.subtitle}>
+            Book turfs, join teams and track your game.
+          </Text>
+        </View>
 
-      <View style={styles.form}>
-        {error ? <ErrorBanner message={error} /> : null}
+        <View style={styles.form}>
+          {error ? <ErrorBanner message={error} /> : null}
 
-        <TextField
-          label="Email"
-          value={email}
-          onChangeText={setEmail}
-          error={fieldErrors.email}
-          autoCapitalize="none"
-          autoComplete="email"
-          keyboardType="email-address"
-          placeholder="you@example.com"
-        />
-        <TextField
-          label="Password"
-          value={password}
-          onChangeText={setPassword}
-          error={fieldErrors.password}
-          secureTextEntry
-          autoComplete="password"
-          placeholder="Your password"
-        />
+          <TextField
+            label="Email"
+            value={email}
+            onChangeText={setEmail}
+            error={fieldErrors.email}
+            autoCapitalize="none"
+            autoComplete="email"
+            keyboardType="email-address"
+            placeholder="you@example.com"
+          />
+          <TextField
+            label="Password"
+            value={password}
+            onChangeText={setPassword}
+            error={fieldErrors.password}
+            secureTextEntry
+            autoComplete="password"
+            placeholder="Your password"
+          />
 
-        <Button label="Sign in" onPress={() => void handleSubmit()} pending={pending} />
+          <Button label="Sign in" onPress={() => void handleSubmit()} pending={pending} />
+        </View>
       </View>
 
       <Pressable onPress={() => navigation.navigate('Register')} style={styles.footer}>
-        <Text style={styles.footerText}>
-          New to PlayHub? <Text style={styles.footerLink}>Create an account</Text>
+        <Text variant="body" color="secondary">
+          New to PlayHub? <Text variant="bodyEmphasized" color="primary">Create an account</Text>
         </Text>
       </Pressable>
     </Screen>
@@ -85,13 +91,12 @@ export function LoginScreen({ navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
+  container: { justifyContent: 'space-between' },
+  content: { flex: 1 },
   header: { marginBottom: spacing.lg },
-  brand: { ...typography.sectionTitle, color: theme.textPrimary, marginBottom: spacing.xl },
+  brand: { marginBottom: spacing.xl },
   brandAccent: { color: theme.primary },
-  title: { ...typography.screenTitle, color: theme.textPrimary },
-  subtitle: { ...typography.body, color: theme.textSecondary, marginTop: spacing.xs },
+  subtitle: { marginTop: spacing.xs },
   form: { marginTop: spacing.sm },
-  footer: { marginTop: spacing.xl, alignItems: 'center' },
-  footerText: { ...typography.body, color: theme.textSecondary },
-  footerLink: { color: theme.primaryText, fontWeight: '600' },
+  footer: { marginTop: spacing.xl, paddingVertical: spacing.md, alignItems: 'center' },
 })
