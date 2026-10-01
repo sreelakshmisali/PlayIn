@@ -27,12 +27,12 @@ export function RootNavigator() {
   const splashOpacity = useRef(new Animated.Value(1)).current
   const reducedMotion = useReducedMotion()
 
-  // Ensure splash screen remains visible for a minimum duration (1200ms)
+  // Ensure splash screen remains visible for a minimum duration (3000ms / 3 seconds)
   // so branding is clearly displayed on startup even when auth resolves instantly.
   useEffect(() => {
     const timer = setTimeout(() => {
       setMinSplashElapsed(true)
-    }, 1200)
+    }, 3000)
     return () => clearTimeout(timer)
   }, [])
 
