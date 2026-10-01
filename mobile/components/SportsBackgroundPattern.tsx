@@ -15,43 +15,79 @@ interface PatternItem {
   left?: `${number}%` | number
   right?: `${number}%` | number
   rotation: string
-  opacity?: number
+  opacity: number
 }
 
-// Scattered around the perimeter edges with generous empty negative space in the center.
-// Some items slightly clip off-screen for an authentic organic lifestyle aesthetic.
+/**
+ * Scattered sports objects across the entire screen:
+ * - Football, basketball, tennis, cricket, badminton, football boots, whistle,
+ *   water bottle, cones, goal/net, basketball hoop, running shoe, stopwatch,
+ *   jersey, field markings, trophies, etc.
+ * - Single monochrome tint derived from PlayHub pitch green.
+ * - Calibrated opacity (0.14 - 0.20) for a visible yet calm, classy watermark effect.
+ * - Denser toward edges, with clean negative space around the central logo.
+ */
 const PATTERN_ITEMS: PatternItem[] = [
-  // Top edge & corners
-  { name: 'soccer', size: 22, top: '4%', left: '-2%', rotation: '-18deg', opacity: 0.08 },
-  { name: 'whistle-outline', size: 18, top: '6%', left: '28%', rotation: '15deg', opacity: 0.07 },
-  { name: 'badminton', size: 20, top: '3%', right: '24%', rotation: '-25deg', opacity: 0.08 },
-  { name: 'tennis-ball', size: 16, top: '5%', right: '-1%', rotation: '12deg', opacity: 0.07 },
+  // --- TOP REGION (0% - 22%) ---
+  { name: 'soccer', size: 24, top: '2%', left: '-1%', rotation: '-18deg', opacity: 0.20 },
+  { name: 'shoe-cleat', size: 21, top: '8%', left: '12%', rotation: '25deg', opacity: 0.17 },
+  { name: 'whistle-outline', size: 18, top: '3%', left: '26%', rotation: '-12deg', opacity: 0.18 },
+  { name: 'badminton', size: 22, top: '2%', left: '46%', rotation: '15deg', opacity: 0.16 },
+  { name: 'tennis-ball', size: 16, top: '7%', left: '62%', rotation: '-20deg', opacity: 0.17 },
+  { name: 'basketball-hoop-outline', size: 23, top: '3%', right: '16%', rotation: '-10deg', opacity: 0.18 },
+  { name: 'cricket', size: 24, top: '4%', right: '-2%', rotation: '30deg', opacity: 0.19 },
 
-  // Upper perimeter
-  { name: 'shoe-cleat', size: 21, top: '14%', left: '8%', rotation: '28deg', opacity: 0.07 },
-  { name: 'traffic-cone', size: 19, top: '15%', right: '8%', rotation: '-14deg', opacity: 0.07 },
-  { name: 'soccer-field', size: 24, top: '22%', left: '-3%', rotation: '-12deg', opacity: 0.06 },
-  { name: 'basketball', size: 22, top: '23%', right: '-2%', rotation: '32deg', opacity: 0.07 },
+  // --- UPPER-MID REGION (14% - 30%) ---
+  { name: 'traffic-cone', size: 19, top: '15%', left: '2%', rotation: '-14deg', opacity: 0.18 },
+  { name: 'tshirt-crew-outline', size: 22, top: '15%', left: '22%', rotation: '12deg', opacity: 0.16 },
+  { name: 'timer-outline', size: 18, top: '23%', left: '8%', rotation: '-22deg', opacity: 0.17 },
+  { name: 'soccer-field', size: 25, top: '24%', left: '27%', rotation: '8deg', opacity: 0.15 },
+  { name: 'tennis', size: 23, top: '14%', right: '23%', rotation: '-25deg', opacity: 0.17 },
+  { name: 'basketball', size: 22, top: '13%', right: '3%', rotation: '18deg', opacity: 0.19 },
+  { name: 'water-outline', size: 19, top: '22%', right: '14%', rotation: '15deg', opacity: 0.16 },
+  { name: 'shoe-sneaker', size: 20, top: '25%', right: '-1%', rotation: '-30deg', opacity: 0.18 },
 
-  // Mid-upper sides (keeping center 35%-65% clear)
-  { name: 'timer-outline', size: 18, top: '32%', left: '5%', rotation: '-15deg', opacity: 0.06 },
-  { name: 'cricket', size: 22, top: '31%', right: '6%', rotation: '40deg', opacity: 0.06 },
+  // --- MID REGION (32% - 60% flanks around logo) ---
+  { name: 'stadium-variant', size: 24, top: '34%', left: '-2%', rotation: '10deg', opacity: 0.17 },
+  { name: 'trophy-outline', size: 20, top: '35%', left: '16%', rotation: '-15deg', opacity: 0.16 },
+  { name: 'volleyball', size: 21, top: '44%', left: '3%', rotation: '24deg', opacity: 0.18 },
+  { name: 'flag-variant-outline', size: 18, top: '53%', left: '14%', rotation: '-18deg', opacity: 0.16 },
+  { name: 'whistle-outline', size: 17, top: '54%', left: '-1%', rotation: '32deg', opacity: 0.17 },
 
-  // Mid-lower sides
-  { name: 'water-outline', size: 19, top: '66%', left: '4%', rotation: '20deg', opacity: 0.07 },
-  { name: 'shoe-sneaker', size: 20, top: '68%', right: '5%', rotation: '-22deg', opacity: 0.06 },
+  { name: 'badminton', size: 21, top: '34%', right: '4%', rotation: '-22deg', opacity: 0.17 },
+  { name: 'soccer', size: 23, top: '37%', right: '19%', rotation: '16deg', opacity: 0.15 },
+  { name: 'cricket', size: 23, top: '45%', right: '2%', rotation: '-12deg', opacity: 0.18 },
+  { name: 'tennis-ball', size: 16, top: '53%', right: '18%', rotation: '28deg', opacity: 0.16 },
+  { name: 'traffic-cone', size: 19, top: '55%', right: '-1%', rotation: '-15deg', opacity: 0.17 },
 
-  // Lower perimeter
-  { name: 'volleyball', size: 21, bottom: '22%', left: '-2%', rotation: '18deg', opacity: 0.07 },
-  { name: 'stadium-variant', size: 24, bottom: '21%', right: '-3%', rotation: '-15deg', opacity: 0.06 },
-  { name: 'tshirt-crew-outline', size: 20, bottom: '13%', left: '9%', rotation: '-10deg', opacity: 0.08 },
-  { name: 'tennis', size: 22, bottom: '14%', right: '10%', rotation: '35deg', opacity: 0.07 },
+  // --- VERY FAINT ACCENTS BEHIND CENTRAL TEXT ---
+  { name: 'medal-outline', size: 16, top: '32%', left: '49%', rotation: '12deg', opacity: 0.10 },
+  { name: 'timer-outline', size: 15, top: '62%', left: '49%', rotation: '-8deg', opacity: 0.10 },
 
-  // Bottom edge & corners
-  { name: 'trophy-outline', size: 20, bottom: '4%', left: '2%', rotation: '-12deg', opacity: 0.07 },
-  { name: 'traffic-cone', size: 18, bottom: '5%', left: '32%', rotation: '22deg', opacity: 0.06 },
-  { name: 'whistle-outline', size: 17, bottom: '4%', right: '30%', rotation: '-18deg', opacity: 0.07 },
-  { name: 'soccer', size: 22, bottom: '3%', right: '-2%', rotation: '25deg', opacity: 0.08 },
+  // --- LOWER-MID REGION (62% - 78%) ---
+  { name: 'basketball', size: 22, top: '63%', left: '10%', rotation: '-20deg', opacity: 0.18 },
+  { name: 'tennis', size: 23, top: '65%', left: '26%', rotation: '30deg', opacity: 0.15 },
+  { name: 'shoe-cleat', size: 21, top: '72%', left: '3%', rotation: '14deg', opacity: 0.18 },
+  { name: 'tshirt-crew-outline', size: 21, top: '73%', left: '20%', rotation: '-16deg', opacity: 0.16 },
+  { name: 'stadium-variant', size: 24, top: '63%', right: '24%', rotation: '-10deg', opacity: 0.15 },
+  { name: 'shoe-sneaker', size: 21, top: '64%', right: '7%', rotation: '25deg', opacity: 0.18 },
+  { name: 'volleyball', size: 21, top: '72%', right: '2%', rotation: '-22deg', opacity: 0.18 },
+  { name: 'water-outline', size: 19, top: '73%', right: '18%', rotation: '18deg', opacity: 0.16 },
+
+  // --- BOTTOM REGION (78% - 99%) ---
+  { name: 'soccer-field', size: 25, bottom: '16%', left: '9%', rotation: '-12deg', opacity: 0.16 },
+  { name: 'basketball-hoop-outline', size: 23, bottom: '15%', right: '14%', rotation: '15deg', opacity: 0.17 },
+  { name: 'badminton', size: 21, bottom: '9%', left: '-2%', rotation: '28deg', opacity: 0.18 },
+  { name: 'cricket', size: 23, bottom: '8%', left: '17%', rotation: '-24deg', opacity: 0.17 },
+  { name: 'whistle-outline', size: 18, bottom: '10%', left: '38%', rotation: '14deg', opacity: 0.17 },
+  { name: 'trophy-outline', size: 21, bottom: '8%', right: '36%', rotation: '-16deg', opacity: 0.16 },
+  { name: 'tennis', size: 23, bottom: '9%', right: '16%', rotation: '22deg', opacity: 0.18 },
+  { name: 'soccer', size: 24, bottom: '8%', right: '-2%', rotation: '-18deg', opacity: 0.19 },
+  { name: 'traffic-cone', size: 19, bottom: '2%', left: '8%', rotation: '16deg', opacity: 0.17 },
+  { name: 'tennis-ball', size: 16, bottom: '2%', left: '30%', rotation: '-30deg', opacity: 0.17 },
+  { name: 'flag-variant-outline', size: 18, bottom: '2%', left: '52%', rotation: '10deg', opacity: 0.16 },
+  { name: 'shoe-cleat', size: 21, bottom: '2%', right: '28%', rotation: '-20deg', opacity: 0.18 },
+  { name: 'basketball', size: 23, bottom: '1%', right: '4%', rotation: '32deg', opacity: 0.19 },
 ]
 
 interface SportsBackgroundPatternProps {
@@ -62,12 +98,10 @@ interface SportsBackgroundPatternProps {
 /**
  * A subtle, elegant sports/play pattern designed for PlayHub.
  *
- * Renders tiny sports objects (soccer ball, basketball, tennis racket, whistle,
- * cleat, cone, stopwatch, shuttlecock, turf markings) scattered organically
- * around the perimeter of the screen.
+ * Renders tiny sports objects scattered organically around the entire screen
+ * with higher density along the edges and breathing room around the central brand.
  *
- * All icons use one extremely light monochrome tint derived from PlayHub's
- * pitch green (contrast is very low and restrained so it never overwhelms).
+ * Uses one light monochrome tint derived from PlayHub's brand green.
  */
 export function SportsBackgroundPattern({ animated = true, style }: SportsBackgroundPatternProps) {
   const reducedMotion = useReducedMotion()
@@ -76,7 +110,7 @@ export function SportsBackgroundPattern({ animated = true, style }: SportsBackgr
   useEffect(() => {
     if (!animated || reducedMotion) return
 
-    // Very slow, calm breathing loop (6s duration) that creates a subtle, relaxed atmosphere
+    // Very slow, calm breathing loop that creates a subtle, relaxed atmosphere
     const animation = Animated.loop(
       Animated.sequence([
         Animated.timing(ambientDrift, {
@@ -98,12 +132,12 @@ export function SportsBackgroundPattern({ animated = true, style }: SportsBackgr
 
   const patternOpacity = ambientDrift.interpolate({
     inputRange: [0, 1],
-    outputRange: [0.85, 1.0],
+    outputRange: [0.9, 1.0],
   })
 
   const patternTranslateY = ambientDrift.interpolate({
     inputRange: [0, 1],
-    outputRange: [0, -2],
+    outputRange: [0, -3],
   })
 
   return (
@@ -125,7 +159,7 @@ export function SportsBackgroundPattern({ animated = true, style }: SportsBackgr
             left: item.left,
             right: item.right,
             transform: [{ rotate: item.rotation }],
-            opacity: item.opacity ?? 0.07,
+            opacity: item.opacity,
           }
 
           return (
@@ -146,9 +180,13 @@ export function SportsBackgroundPattern({ animated = true, style }: SportsBackgr
 const styles = StyleSheet.create({
   container: {
     ...StyleSheet.absoluteFill,
+    width: '100%',
+    height: '100%',
     overflow: 'hidden',
   },
   fill: {
-    flex: 1,
+    ...StyleSheet.absoluteFill,
+    width: '100%',
+    height: '100%',
   },
 })
