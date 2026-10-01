@@ -27,9 +27,13 @@ export function RootNavigator() {
   const splashOpacity = useRef(new Animated.Value(1)).current
   const reducedMotion = useReducedMotion()
 
-  // Ensure splash screen remains visible for a minimum duration (3000ms / 3 seconds)
-  // so branding is clearly displayed on startup even when auth resolves instantly.
+  // Ensure custom splash screen remains visible for at least 3 seconds
+  // Dismiss native splash immediately on mount so the custom animated SplashScreen is seen
   useEffect(() => {
+    SplashScreenModule.hideAsync().catch(() => {
+      /* ignore error if already hidden */
+    })
+
     const timer = setTimeout(() => {
       setMinSplashElapsed(true)
     }, 3000)
@@ -38,11 +42,6 @@ export function RootNavigator() {
 
   useEffect(() => {
     if (status === 'loading' || !minSplashElapsed || !showSplash) return
-
-    // Dismiss native splash screen smoothly when session resolution & min timer complete
-    SplashScreenModule.hideAsync().catch(() => {
-      /* ignore error if already hidden */
-    })
 
     // Under Reduce Motion, drop the splash immediately rather than
     // crossfading it out — same end state, no animated transform/opacity.
