@@ -1,15 +1,25 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack'
 import { useState } from 'react'
-import { Pressable, StyleSheet, View } from 'react-native'
+import { Alert, Pressable, View } from 'react-native'
 
-import { Button, ErrorBanner, Screen, Text, TextField } from '../../components'
+import { Button, ErrorBanner, PlayHubLogo, Text, TextField } from '../../components'
 import { useAuth } from '../../hooks'
-import { spacing, theme } from '../../theme'
 import { ApiError } from '../../services/api'
 import type { AuthStackParamList } from '../../navigation/types'
+import { AuthLayout } from './AuthLayout'
+import { authStyles } from './authStyles'
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'Login'>
 
+/**
+ * Sign In Screen
+ *
+ * Minimalist, sporty, and classy aesthetic:
+ * - Vertically and horizontally centered open layout
+ * - Generous whitespace and restrained brand accent
+ * - Tactile compact inputs with secure visibility toggle
+ * - Clean visual hierarchy
+ */
 export function LoginScreen({ navigation }: Props) {
   const { login } = useAuth()
 
@@ -23,10 +33,22 @@ export function LoginScreen({ navigation }: Props) {
     setPending(true)
     setError('')
     setFieldErrors({})
+
+    const trimmedEmail = email.trim().toLowerCase()
+    if (!trimmedEmail) {
+      setFieldErrors({ email: 'Email is required' })
+      setPending(false)
+      return
+    }
+
+    if (!password) {
+      setFieldErrors({ password: 'Password is required' })
+      setPending(false)
+      return
+    }
+
     try {
-      await login({ email: email.trim().toLowerCase(), password })
-      // No manual navigation: RootNavigator swaps to the role-based flow the
-      // moment the auth status changes.
+      await login({ email: trimmedEmail, password })
     } catch (cause) {
       if (cause instanceof ApiError) {
         setFieldErrors(cause.fieldErrors())
@@ -39,64 +61,83 @@ export function LoginScreen({ navigation }: Props) {
     }
   }
 
+  function handleForgotPassword() {
+    Alert.alert(
+      'Forgot Password',
+      'Please reach out to support@playhub.com or contact your turf administrator to reset your account credentials.',
+      [{ text: 'OK' }],
+    )
+  }
+
   return (
-    <Screen keyboardSafe contentStyle={styles.container}>
-      <View style={styles.content}>
-        <View style={styles.header}>
-          <Text variant="sectionTitle" color="primary" style={styles.brand}>
-            PlayHub<Text variant="sectionTitle" style={styles.brandAccent}>.</Text>
-          </Text>
-          <Text variant="screenTitle" color="primary">
-            Sign in
-          </Text>
-          <Text variant="body" color="secondary" style={styles.subtitle}>
-            Book turfs, join teams and track your game.
-          </Text>
-        </View>
-
-        <View style={styles.form}>
-          {error ? <ErrorBanner message={error} /> : null}
-
-          <TextField
-            label="Email"
-            value={email}
-            onChangeText={setEmail}
-            error={fieldErrors.email}
-            autoCapitalize="none"
-            autoComplete="email"
-            keyboardType="email-address"
-            placeholder="you@example.com"
-          />
-          <TextField
-            label="Password"
-            value={password}
-            onChangeText={setPassword}
-            error={fieldErrors.password}
-            secureTextEntry
-            autoComplete="password"
-            placeholder="Your password"
-          />
-
-          <Button label="Sign in" onPress={() => void handleSubmit()} pending={pending} />
-        </View>
+    <AuthLayout>
+      {/* 1-3. Centered Brand & Welcoming Header */}
+      <View style={authStyles.header}>
+        <PlayHubLogo size="md" showWordmark={false} style={authStyles.logoMark} />
+        <Text style={authStyles.title}>Welcome back</Text>
+        <Text style={authStyles.subtitle}>Ready to get back in the game?</Text>
       </View>
 
-      <Pressable onPress={() => navigation.navigate('Register')} style={styles.footer}>
-        <Text variant="body" color="secondary">
-          New to PlayHub? <Text variant="bodyEmphasized" color="primary">Create an account</Text>
-        </Text>
-      </Pressable>
-    </Screen>
+      {/* Form Area */}
+      <View style={authStyles.form}>
+        {error ? <ErrorBanner message={error} /> : null}
+
+        {/* 4. Email input */}
+        <TextField
+          label="Email"
+          value={email}
+          onChangeText={setEmail}
+          error={fieldErrors.email}
+          autoCapitalize="none"
+          autoComplete="email"
+          keyboardType="email-address"
+          placeholder="you@example.com"
+        />
+
+        {/* 5. Password input */}
+        <TextField
+          label="Password"
+          value={password}
+          onChangeText={setPassword}
+          error={fieldErrors.password}
+          secureTextEntry
+          autoComplete="password"
+          placeholder="Your password"
+        />
+
+        {/* 6. Primary Sign In button */}
+        <Button label="Sign in" onPress={() => void handleSubmit()} pending={pending} />
+
+        {/* 7. Forgot Password action */}
+        <Pressable
+          onPress={handleForgotPassword}
+          accessibilityRole="button"
+          accessibilityLabel="Forgot password"
+          hitSlop={{ top: 8, bottom: 8, left: 12, right: 12 }}
+          style={authStyles.forgotPasswordButton}
+        >
+          <Text style={authStyles.forgotPasswordText}>Forgot password?</Text>
+        </Pressable>
+
+        {/* 8. Divider */}
+        <View style={authStyles.dividerRow}>
+          <View style={authStyles.dividerLine} />
+          <Text style={authStyles.dividerText}>or</Text>
+          <View style={authStyles.dividerLine} />
+        </View>
+
+        {/* 10. Link to Sign Up */}
+        <Pressable
+          onPress={() => navigation.navigate('Register')}
+          accessibilityRole="button"
+          hitSlop={{ top: 8, bottom: 8, left: 12, right: 12 }}
+          style={authStyles.footer}
+        >
+          <Text style={authStyles.footerText}>
+            Don't have an account? <Text style={authStyles.footerLink}>Sign up</Text>
+          </Text>
+        </Pressable>
+      </View>
+    </AuthLayout>
   )
 }
-
-const styles = StyleSheet.create({
-  container: { justifyContent: 'space-between' },
-  content: { flex: 1 },
-  header: { marginBottom: spacing.lg },
-  brand: { marginBottom: spacing.xl },
-  brandAccent: { color: theme.primary },
-  subtitle: { marginTop: spacing.xs },
-  form: { marginTop: spacing.sm },
-  footer: { marginTop: spacing.xl, paddingVertical: spacing.md, alignItems: 'center' },
-})
